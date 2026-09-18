@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meiose — animação científica</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#eef3f9;--card:#fff;--ink:#172033;--muted:#68758a;--line:#d9e2ee;
+  --accent:#5666e8;--accent2:#7684ff;--soft:#eef0ff;
+  --red:#df5960;--blue:#3e78d6;--gold:#f0b64f;--spindle:#8491a4;
+}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:
+  radial-gradient(circle at 10% 0%,rgba(86,102,232,.08),transparent 28%),
+  radial-gradient(circle at 90% 10%,rgba(62,120,214,.06),transparent 30%),var(--bg);
+  color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
+.page{width:min(1260px,calc(100% - 28px));margin:24px auto 38px}
+.hero{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:16px}
+.kicker{margin:0 0 7px;color:var(--accent);font-size:11px;font-weight:900;letter-spacing:.15em}
+h1{margin:0;font-size:clamp(46px,7vw,78px);line-height:.93;letter-spacing:-.055em}
+.hero p.desc{max-width:760px;margin:12px 0 0;color:var(--muted);line-height:1.55}
+.model{
+  min-width:255px;padding:14px 16px;background:rgba(255,255,255,.8);border:1px solid var(--line);
+  border-radius:18px;box-shadow:0 12px 36px rgba(32,49,78,.05)
+}
+.model span,.model small{display:block;color:var(--muted);font-size:10px}
+.model strong{display:block;margin:4px 0;font-size:14px}
+
+.status{
+  display:flex;justify-content:space-between;align-items:center;gap:20px;padding:17px 19px;
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  box-shadow:0 14px 40px rgba(32,49,78,.05);margin-bottom:14px
+}
+.tag{display:inline-block;padding:5px 9px;border-radius:999px;background:var(--soft);color:var(--accent);font-size:10px;font-weight:900}
+h2{margin:6px 0 3px;font-size:clamp(23px,3vw,33px);letter-spacing:-.025em}
+.status p{margin:0;color:var(--muted);line-height:1.45}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.metric{min-width:102px;padding:9px 10px;border-radius:12px;background:#f7f9fd;border:1px solid #e6ebf3}
+.metric span{display:block;color:var(--muted);font-size:9px;line-height:1.2}
+.metric strong{display:block;margin-top:3px;font-size:18px}
+
+.layout{display:grid;grid-template-columns:230px 1fr;gap:14px}
+.timeline,.animation,.note{
+  background:var(--card);border:1px solid var(--line);box-shadow:0 14px 40px rgba(32,49,78,.05)
+}
+.timeline{border-radius:20px;padding:14px}
+.timeline h3{margin:2px 5px 10px;font-size:16px}
+.timeline ol{list-style:none;padding:0;margin:0;display:grid;gap:2px}
+.timeline li{display:flex;align-items:center;gap:9px;padding:7px;border-radius:12px;color:var(--muted);transition:.2s}
+.timeline li b{display:grid;place-items:center;flex:0 0 27px;width:27px;height:27px;border-radius:50%;background:#edf1f6;font-size:10px}
+.timeline li strong,.timeline li small{display:block}
+.timeline li strong{font-size:11px}.timeline li small{font-size:9px;margin-top:1px;color:#8e99a9}
+.timeline li.active{background:var(--soft);color:var(--ink)}
+.timeline li.active b{background:var(--accent);color:#fff}
+.timeline li.done b{background:#dff3eb;color:#16845b}
+
+.animation{border-radius:20px;overflow:hidden}
+.legend{display:flex;flex-wrap:wrap;gap:13px;padding:10px 14px;border-bottom:1px solid #e8edf4;color:var(--muted);font-size:10px}
+.legend span{display:flex;align-items:center;gap:6px}
+.swatch{display:inline-block;width:21px;height:5px;border-radius:999px}
+.swatch.red{background:var(--red)}.swatch.blue{background:var(--blue)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--gold)}
+.line{display:inline-block;width:21px;height:2px;background:var(--spindle)}
+.scene-wrap{background:#fbfcff;padding:2px 8px 0}
+#scene{display:block;width:100%;height:auto;max-height:590px;min-height:430px}
+.svg-label{fill:#5666e8;font-size:15px;font-weight:800}
+.svg-bottom{fill:#657188;font-size:13px;font-weight:900;letter-spacing:.04em}
+.controls{display:flex;justify-content:center;gap:9px;padding:10px 14px 13px;background:#fbfcff}
+button{border:0;border-radius:11px;padding:10px 15px;font:inherit;font-weight:850;cursor:pointer}
+.primary{background:var(--accent);color:#fff;box-shadow:0 7px 18px rgba(86,102,232,.2)}
+.secondary{background:#e9eef5;color:var(--ink)}
+button:disabled{opacity:.55;cursor:default}
+.progress{height:6px;background:#e8edf4}
+#bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .35s ease}
+
+.notes{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px;margin-top:14px}
+.note{border-radius:17px;padding:15px 16px}
+.note>span{font-size:9px;color:var(--accent);font-weight:900;letter-spacing:.12em}
+.note h3{margin:5px 0 5px;font-size:15px}
+.note p{margin:0;color:var(--muted);line-height:1.45;font-size:12px}
+.version{text-align:right;color:#9aa5b5;font-size:9px;margin-top:8px}
+
+@media(max-width:980px){
+  .status{display:block}.metrics{margin-top:13px}.layout{grid-template-columns:1fr}.timeline{order:2}
+  .timeline ol{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:720px){
+  .hero{display:block}.model{margin-top:13px}.metrics{grid-template-columns:repeat(2,1fr)}
+  .notes{grid-template-columns:1fr}.timeline ol{grid-template-columns:1fr}
+  #scene{min-height:350px}
+}
+</style>
+</head>
+
+<body>
+<main class="page">
+  <header class="hero">
+    <div>
+      <p class="kicker">BIOLOGIA • MODELO ANIMADO</p>
+      <h1>Meiose</h1>
+      <p class="desc">Representação contínua das transições da meiose em uma célula animal simplificada com <strong>2n = 4</strong>.</p>
+    </div>
+    <div class="model">
+      <span>MODELO DIDÁTICO</span>
+      <strong>1 célula diploide → 4 células haploides</strong>
+      <small>2 pares de cromossomos homólogos</small>
+    </div>
+  </header>
+
+  <section class="status">
+    <div>
+      <span id="stageTag" class="tag">PRONTO</span>
+      <h2 id="stageName">Interfase pré-meiótica</h2>
+      <p id="stageText">A cromatina está descondensada antes da replicação do DNA.</p>
+    </div>
+    <div class="metrics">
+      <div class="metric"><span>PLOIDIA</span><strong id="mPloidy">2n</strong></div>
+      <div class="metric"><span>CROMOSSOMOS / CÉLULA</span><strong id="mChrom">4</strong></div>
+      <div class="metric"><span>CROMÁTIDES / CÉLULA</span><strong id="mChromatids">4</strong></div>
+      <div class="metric"><span>CONTEÚDO DE DNA</span><strong id="mDNA">2C</strong></div>
+    </div>
+  </section>
+
+  <section class="layout">
+    <aside class="timeline">
+      <h3>Fases</h3>
+      <ol id="timeline">
+        <li data-n="1"><b>1</b><span><strong>Interfase</strong><small>replicação do DNA</small></span></li>
+        <li data-n="2"><b>2</b><span><strong>Prófase I</strong><small>sinapse + crossing-over</small></span></li>
+        <li data-n="3"><b>3</b><span><strong>Metáfase I</strong><small>bivalentes no equador</small></span></li>
+        <li data-n="4"><b>4</b><span><strong>Anáfase I</strong><small>homólogos se separam</small></span></li>
+        <li data-n="5"><b>5</b><span><strong>Telófase I</strong><small>2 células haploides</small></span></li>
+        <li data-n="6"><b>6</b><span><strong>Intercinese</strong><small>sem nova replicação</small></span></li>
+        <li data-n="7"><b>7</b><span><strong>Prófase II</strong><small>novo fuso</small></span></li>
+        <li data-n="8"><b>8</b><span><strong>Metáfase II</strong><small>alinhamento individual</small></span></li>
+        <li data-n="9"><b>9</b><span><strong>Anáfase II</strong><small>cromátides se separam</small></span></li>
+        <li data-n="10"><b>10</b><span><strong>Telófase II</strong><small>4 células haploides</small></span></li>
+      </ol>
+    </aside>
+
+    <section class="animation">
+      <div class="legend">
+        <span><i class="swatch red"></i> origem materna</span>
+        <span><i class="swatch blue"></i> origem paterna</span>
+        <span><i class="dot"></i> centrômero</span>
+        <span><i class="line"></i> fibras do fuso</span>
+      </div>
+
+      <div class="scene-wrap">
+      <svg id="scene" viewBox="0 0 1000 560" role="img" aria-label="Animação das fases da meiose">
+        <!-- célula inicial -->
+        <ellipse id="mainCell" cx="500" cy="280" rx="350" ry="205" fill="#fbfdff" stroke="#91a6c2" stroke-width="4"/>
+        <ellipse id="nucleus" cx="500" cy="280" rx="220" ry="138" fill="#f5f7ff" stroke="#b2bfd0" stroke-width="3" stroke-dasharray="9 9"/>
+
+        <!-- cromatina -->
+        <g id="chromatin">
+          <path d="M390 215 C420 180,450 250,485 210 S545 250,580 195" fill="none" stroke="#df5960" stroke-width="8" stroke-linecap="round"/>
+          <path d="M405 305 C440 270,475 340,510 300 S570 340,610 290" fill="none" stroke="#3e78d6" stroke-width="8" stroke-linecap="round"/>
+          <path d="M405 365 C435 340,465 390,495 360 S540 385,570 350" fill="none" stroke="#df5960" stroke-width="7" stroke-linecap="round"/>
+          <path d="M420 160 C450 140,480 185,510 160 S555 182,585 150" fill="none" stroke="#3e78d6" stroke-width="7" stroke-linecap="round"/>
+        </g>
+
+        <g id="chromatinCopies" opacity="0">
+          <path d="M397 223 C427 188,457 258,492 218 S552 258,587 203" fill="none" stroke="#df5960" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+          <path d="M412 313 C447 278,482 348,517 308 S577 348,617 298" fill="none" stroke="#3e78d6" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+          <path d="M412 373 C442 348,472 398,502 368 S547 393,577 358" fill="none" stroke="#df5960" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+          <path d="M427 168 C457 148,487 193,517 168 S562 190,592 158" fill="none" stroke="#3e78d6" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+        </g>
+
+        <text id="phaseCallout" x="500" y="78" text-anchor="middle" class="svg-label" opacity="0">Fase S: replicação do DNA</text>
+
+        <!-- fuso I -->
+        <line id="equatorI" x1="500" y1="105" x2="500" y2="455" stroke="#abb7c8" stroke-width="2" stroke-dasharray="7 9" opacity="0"/>
+        <g id="spindleI" opacity="0" stroke="#8491a4" stroke-width="2.3">
+          <circle cx="165" cy="280" r="8" fill="#748096" stroke="none"/>
+          <circle cx="835" cy="280" r="8" fill="#748096" stroke="none"/>
+          <line x1="165" y1="280" x2="465" y2="215"/>
+          <line x1="165" y1="280" x2="465" y2="350"/>
+          <line x1="835" y1="280" x2="535" y2="215"/>
+          <line x1="835" y1="280" x2="535" y2="350"/>
+        </g>
+
+        <!-- cromossomos condensados -->
+        <g id="mLong" opacity="0">
+          <line x1="-20" y1="-37" x2="0" y2="0" stroke="#df5960" stroke-width="10" stroke-linecap="round"/>
+          <line id="mSwap" x1="20" y1="-37" x2="0" y2="0" stroke="#df5960" stroke-width="10" stroke-linecap="round"/>
+          <line x1="0" y1="0" x2="20" y2="37" stroke="#df5960" stroke-width="10" stroke-linecap="round"/>
+          <line x1="0" y1="0" x2="-20" y2="37" stroke="#df5960" stroke-width="10" stroke-linecap="round"/>
+          <circle r="6.5" fill="#f0b64f" stroke="#fff7df" stroke-width="2"/>
+        </g>
+        <g id="pLong" opacity="0">
+          <line x1="-20" y1="-37" x2="0" y2="0" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/>
+          <line id="pSwap" x1="20" y1="-37" x2="0" y2="0" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/>
+          <line x1="0" y1="0" x2="20" y2="37" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/>
+          <line x1="0" y1="0" x2="-20" y2="37" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/>
+          <circle r="6.5" fill="#f0b64f" stroke="#fff7df" stroke-width="2"/>
+        </g>
+        <g id="mShort" opacity="0">
+          <line x1="-15" y1="-28" x2="0" y2="0" stroke="#df5960" stroke-width="9" stroke-linecap="round"/>
+          <line x1="15" y1="-28" x2="0" y2="0" stroke="#df5960" stroke-width="9" stroke-linecap="round"/>
+          <line x1="0" y1="0" x2="15" y2="28" stroke="#df5960" stroke-width="9" stroke-linecap="round"/>
+          <line x1="0" y1="0" x2="-15" y2="28" stroke="#df5960" stroke-width="9" stroke-linecap="round"/>
+          <circle r="6" fill="#f0b64f" stroke="#fff7df" stroke-width="2"/>
+        </g>
+        <g id="pShort" opacity="0">
+          <line x1="-15" y1="-28" x2="0" y2="0" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/>
+          <line x1="15" y1="-28" x2="0" y2="0" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/>
+          <line x1="0" y1="0" x2="15" y2="28" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/>
+          <line x1="0" y1="0" x2="-15" y2="28" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/>
+          <circle r="6" fill="#f0b64f" stroke="#fff7df" stroke-width="2"/>
+        </g>
+
+        <circle id="crossGlow" cx="500" cy="210" r="55" fill="#5666e812" stroke="#5666e8" stroke-width="3" opacity="0"/>
+
+        <!-- células da meiose I -->
+        <ellipse id="leftCell" cx="410" cy="280" rx="210" ry="195" fill="#fbfdff" stroke="#91a6c2" stroke-width="4" opacity="0"/>
+        <ellipse id="rightCell" cx="590" cy="280" rx="210" ry="195" fill="#fbfdff" stroke="#91a6c2" stroke-width="4" opacity="0"/>
+
+        <!-- fuso II -->
+        <g id="spindleII" opacity="0" stroke="#8491a4" stroke-width="2.2">
+          <circle cx="280" cy="105" r="8" fill="#748096" stroke="none"/>
+          <circle cx="280" cy="455" r="8" fill="#748096" stroke="none"/>
+          <circle cx="720" cy="105" r="8" fill="#748096" stroke="none"/>
+          <circle cx="720" cy="455" r="8" fill="#748096" stroke="none"/>
+          <line x1="280" y1="105" x2="255" y2="280"/><line x1="280" y1="105" x2="315" y2="280"/>
+          <line x1="280" y1="455" x2="255" y2="280"/><line x1="280" y1="455" x2="315" y2="280"/>
+          <line x1="720" y1="105" x2="685" y2="280"/><line x1="720" y1="105" x2="745" y2="280"/>
+          <line x1="720" y1="455" x2="685" y2="280"/><line x1="720" y1="455" x2="745" y2="280"/>
+        </g>
+        <line id="eq2L" x1="125" y1="280" x2="435" y2="280" stroke="#abb7c8" stroke-width="2" stroke-dasharray="7 9" opacity="0"/>
+        <line id="eq2R" x1="565" y1="280" x2="875" y2="280" stroke="#abb7c8" stroke-width="2" stroke-dasharray="7 9" opacity="0"/>
+
+        <!-- cromátides separadas -->
+        <g id="singles" opacity="0">
+          <g id="s1"><line x1="0" y1="-29" x2="0" y2="29" stroke="#df5960" stroke-width="10" stroke-linecap="round"/><line x1="0" y1="-29" x2="0" y2="-14" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/><circle r="6" fill="#f0b64f"/></g>
+          <g id="s2"><line x1="0" y1="-29" x2="0" y2="29" stroke="#df5960" stroke-width="10" stroke-linecap="round"/><circle r="6" fill="#f0b64f"/></g>
+          <g id="s3"><line x1="0" y1="-29" x2="0" y2="29" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/><line x1="0" y1="-29" x2="0" y2="-14" stroke="#df5960" stroke-width="10" stroke-linecap="round"/><circle r="6" fill="#f0b64f"/></g>
+          <g id="s4"><line x1="0" y1="-29" x2="0" y2="29" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/><circle r="6" fill="#f0b64f"/></g>
+          <g id="s5"><line x1="0" y1="-22" x2="0" y2="22" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/><circle r="5" fill="#f0b64f"/></g>
+          <g id="s6"><line x1="0" y1="-22" x2="0" y2="22" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/><circle r="5" fill="#f0b64f"/></g>
+          <g id="s7"><line x1="0" y1="-22" x2="0" y2="22" stroke="#df5960" stroke-width="9" stroke-linecap="round"/><circle r="5" fill="#f0b64f"/></g>
+          <g id="s8"><line x1="0" y1="-22" x2="0" y2="22" stroke="#df5960" stroke-width="9" stroke-linecap="round"/><circle r="5" fill="#f0b64f"/></g>
+        </g>
+
+        <!-- células finais -->
+        <ellipse id="f1" cx="280" cy="205" rx="155" ry="93" fill="#fbfdff" stroke="#91a6c2" stroke-width="4" opacity="0"/>
+        <ellipse id="f2" cx="280" cy="355" rx="155" ry="93" fill="#fbfdff" stroke="#91a6c2" stroke-width="4" opacity="0"/>
+        <ellipse id="f3" cx="720" cy="205" rx="155" ry="93" fill="#fbfdff" stroke="#91a6c2" stroke-width="4" opacity="0"/>
+        <ellipse id="f4" cx="720" cy="355" rx="155" ry="93" fill="#fbfdff" stroke="#91a6c2" stroke-width="4" opacity="0"/>
+
+        <text id="bottomLabel" x="500" y="535" text-anchor="middle" class="svg-bottom" opacity="0"></text>
+      </svg>
+      </div>
+
+      <div class="controls">
+        <button id="playBtn" class="primary">▶ Iniciar animação</button>
+        <button id="restartBtn" class="secondary">↻ Reiniciar</button>
+      </div>
+      <div class="progress"><div id="bar"></div></div>
+    </section>
+  </section>
+
+  <section class="notes">
+    <article class="note">
+      <span>O QUE OBSERVAR</span>
+      <h3 id="noteTitle">A replicação não altera a ploidia</h3>
+      <p id="noteText">Na fase S, a quantidade de DNA dobra, mas o número de cromossomos permanece o mesmo.</p>
+    </article>
+    <article class="note">
+      <span>COMO LER O MODELO</span>
+      <h3>Cada X é um cromossomo duplicado</h3>
+      <p>Duas cromátides-irmãs permanecem unidas pelo centrômero até a Anáfase II.</p>
+    </article>
+    <article class="note">
+      <span>MODELO DIDÁTICO</span>
+      <h3>Formas simplificadas</h3>
+      <p>A representação mostra meiose animal com citocineses simétricas; formas e distâncias não estão em escala real.</p>
+    </article>
+  </section>
+  <div class="version">V4 • arquivo único</div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const timeline=[...document.querySelectorAll("#timeline li")];
+let started=false,paused=false;
+
+const E={
+ mainCell:$("mainCell"),nucleus:$("nucleus"),chromatin:$("chromatin"),copies:$("chromatinCopies"),
+ callout:$("phaseCallout"),equatorI:$("equatorI"),spindleI:$("spindleI"),
+ mLong:$("mLong"),pLong:$("pLong"),mShort:$("mShort"),pShort:$("pShort"),
+ cross:$("crossGlow"),left:$("leftCell"),right:$("rightCell"),spindleII:$("spindleII"),
+ eq2L:$("eq2L"),eq2R:$("eq2R"),singles:$("singles"),bottom:$("bottomLabel"),
+ finals:[$("f1"),$("f2"),$("f3"),$("f4")],
+ single:[$("s1"),$("s2"),$("s3"),$("s4"),$("s5"),$("s6"),$("s7"),$("s8")]
+};
+
+function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+function lerp(a,b,t){return a+(b-a)*t}
+function tween(ms,fn){
+ return new Promise(resolve=>{
+  let elapsed=0,last=performance.now();
+  function frame(now){
+   if(!paused){
+    elapsed+=now-last;
+    const t=Math.min(elapsed/ms,1);
+    fn(ease(t));
+    if(t>=1){resolve();return}
+   }
+   last=now;requestAnimationFrame(frame)
+  }
+  requestAnimationFrame(frame)
+ })
+}
+function wait(ms){return tween(ms,()=>{})}
+function fade(el,a,b,ms=500){el.style.opacity=a;return tween(ms,t=>el.style.opacity=lerp(a,b,t))}
+function pos(el,x,y){el.setAttribute("transform",`translate(${x} ${y})`)}
+function move(el,a,b,ms=900){return tween(ms,t=>pos(el,lerp(a[0],b[0],t),lerp(a[1],b[1],t)))}
+function attr(el,name,a,b,ms=700){return tween(ms,t=>el.setAttribute(name,lerp(a,b,t)))}
+
+function stage(s){
+ $("stageTag").textContent=`ETAPA ${s.n} DE 10`;
+ $("stageName").textContent=s.name;$("stageText").textContent=s.text;
+ $("mPloidy").textContent=s.ploidy;$("mChrom").textContent=s.chrom;
+ $("mChromatids").textContent=s.chromatids;$("mDNA").textContent=s.dna;
+ $("noteTitle").textContent=s.noteTitle;$("noteText").textContent=s.note;
+ $("bar").style.width=s.progress+"%";
+ timeline.forEach(li=>{
+  const n=+li.dataset.n;
+  li.classList.toggle("active",n===s.n);li.classList.toggle("done",n<s.n)
+ })
+}
+function showCallout(text){
+ E.callout.textContent=text;
+ return fade(E.callout,0,1,300)
+}
+function hideCallout(){return fade(E.callout,1,0,250)}
+
+pos(E.mLong,410,220);pos(E.pLong,590,220);pos(E.mShort,410,350);pos(E.pShort,590,350);
+
+async function s1(){
+ stage({n:1,name:"Interfase pré-meiótica — fase S",text:"A cromatina está descondensada e o DNA é replicado uma única vez antes da Meiose I.",ploidy:"2n",chrom:"4",chromatids:"4 → 8",dna:"2C → 4C",noteTitle:"A replicação não altera a ploidia",note:"A célula continua com 4 cromossomos. Dobram a quantidade de DNA e o número de cromátides.",progress:10});
+ await Promise.all([fade(E.copies,0,1,900),showCallout("Fase S: o DNA é replicado uma única vez")]);await wait(650);await hideCallout()
+}
+async function s2(){
+ stage({n:2,name:"Prófase I",text:"Os cromossomos condensam, os homólogos fazem sinapse e pode ocorrer crossing-over.",ploidy:"2n",chrom:"4",chromatids:"8",dna:"4C",noteTitle:"Sinapse, bivalentes e crossing-over",note:"Os homólogos formam bivalentes (tétrades). O crossing-over ocorre entre cromátides não-irmãs.",progress:22});
+ await Promise.all([fade(E.chromatin,1,0,600),fade(E.copies,1,0,600),fade(E.nucleus,1,.12,650),fade(E.mLong,0,1,550),fade(E.pLong,0,1,550),fade(E.mShort,0,1,550),fade(E.pShort,0,1,550)]);
+ await Promise.all([move(E.mLong,[410,220],[470,215],850),move(E.pLong,[590,220],[530,215],850),move(E.mShort,[410,350],[470,355],850),move(E.pShort,[590,350],[530,355],850)]);
+ await Promise.all([fade(E.cross,0,1,300),showCallout("Crossing-over entre cromátides não-irmãs")]);
+ $("mSwap").setAttribute("stroke","#3e78d6");$("pSwap").setAttribute("stroke","#df5960");
+ await wait(750);await Promise.all([fade(E.cross,1,0,300),hideCallout(),fade(E.nucleus,.12,0,300)])
+}
+async function s3(){
+ stage({n:3,name:"Metáfase I",text:"Os bivalentes alinham-se no plano equatorial. A orientação de cada par é independente.",ploidy:"2n",chrom:"4",chromatids:"8",dna:"4C",noteTitle:"Pares homólogos alinhados",note:"A orientação independente dos bivalentes também aumenta a variabilidade genética.",progress:34});
+ await Promise.all([fade(E.equatorI,0,1,300),fade(E.spindleI,0,1,450),move(E.mLong,[470,215],[470,210],550),move(E.pLong,[530,215],[530,210],550),move(E.mShort,[470,355],[470,350],550),move(E.pShort,[530,355],[530,350],550)]);await wait(500)
+}
+async function s4(){
+ stage({n:4,name:"Anáfase I",text:"Os cromossomos homólogos migram para polos opostos; as cromátides-irmãs permanecem unidas.",ploidy:"n por polo",chrom:"2 por polo",chromatids:"4 por polo",dna:"2C por polo",noteTitle:"Na Anáfase I o X continua inteiro",note:"Cada cromossomo duplicado migra inteiro. As cromátides-irmãs ainda não se separam.",progress:46});
+ await Promise.all([move(E.mLong,[470,210],[275,220],1200),move(E.pShort,[530,350],[325,345],1200),move(E.pLong,[530,210],[725,220],1200),move(E.mShort,[470,350],[675,345],1200)]);await wait(300)
+}
+async function s5(){
+ stage({n:5,name:"Telófase I + citocinese",text:"A célula origina duas células haploides; cada cromossomo ainda possui duas cromátides.",ploidy:"n",chrom:"2",chromatids:"4",dna:"2C",noteTitle:"A Meiose I é reducional",note:"O número de conjuntos cromossômicos cai de 2n para n.",progress:57});
+ await Promise.all([fade(E.equatorI,1,0,250),fade(E.spindleI,1,0,300),fade(E.mainCell,1,0,550),fade(E.left,0,1,550),fade(E.right,0,1,550)]);
+ await Promise.all([attr(E.left,"cx",410,280,800),attr(E.right,"cx",590,720,800),attr(E.left,"rx",210,180,800),attr(E.right,"rx",210,180,800),
+ move(E.mLong,[275,220],[245,250],600),move(E.pShort,[325,345],[315,330],600),move(E.pLong,[725,220],[755,250],600),move(E.mShort,[675,345],[685,330],600)]);
+ await wait(350)
+}
+async function s6(){
+ stage({n:6,name:"Intercinese",text:"As duas células se preparam para a Meiose II. Não ocorre nova replicação do DNA.",ploidy:"n",chrom:"2",chromatids:"4",dna:"2C",noteTitle:"Não existe nova fase S",note:"O DNA foi duplicado apenas uma vez: antes da Meiose I.",progress:65});
+ await showCallout("Intercinese: sem nova replicação do DNA");await wait(700);await hideCallout()
+}
+async function s7(){
+ stage({n:7,name:"Prófase II",text:"Forma-se um novo fuso em cada célula para separar as cromátides-irmãs.",ploidy:"n",chrom:"2",chromatids:"4",dna:"2C",noteTitle:"Começa a segunda divisão",note:"A ploidia já é n. A Meiose II separa as cromátides-irmãs.",progress:73});
+ E.bottom.textContent="MEIOSE II";
+ await Promise.all([fade(E.spindleII,0,1,450),fade(E.bottom,0,1,300),move(E.mLong,[245,250],[255,280],550),move(E.pShort,[315,330],[305,300],550),move(E.pLong,[755,250],[745,280],550),move(E.mShort,[685,330],[695,300],550)])
+}
+async function s8(){
+ stage({n:8,name:"Metáfase II",text:"Os cromossomos alinham-se individualmente no equador de cada célula.",ploidy:"n",chrom:"2",chromatids:"4",dna:"2C",noteTitle:"Alinhamento individual",note:"Diferentemente da Metáfase I, os cromossomos homólogos não estão emparelhados.",progress:82});
+ await Promise.all([fade(E.eq2L,0,1,300),fade(E.eq2R,0,1,300)]);await wait(700)
+}
+async function s9(){
+ stage({n:9,name:"Anáfase II",text:"Os centrômeros se dividem e as cromátides-irmãs migram para polos opostos.",ploidy:"n por polo",chrom:"2 por polo",chromatids:"2 por polo",dna:"1C por polo",noteTitle:"Cada cromátide passa a ser um cromossomo",note:"Após a separação, cada cromátide-irmã é considerada um cromossomo independente.",progress:92});
+ await Promise.all([fade(E.eq2L,1,0,220),fade(E.eq2R,1,0,220),fade(E.mLong,1,0,260),fade(E.pLong,1,0,260),fade(E.mShort,1,0,260),fade(E.pShort,1,0,260)]);
+ E.singles.style.opacity=1;
+ const A=[[255,280],[255,280],[745,280],[745,280],[305,300],[305,300],[695,300],[695,300]];
+ const B=[[255,155],[255,405],[745,155],[745,405],[305,155],[305,405],[695,155],[695,405]];
+ E.single.forEach((el,i)=>pos(el,A[i][0],A[i][1]));
+ await Promise.all(E.single.map((el,i)=>move(el,A[i],B[i],1150)));await wait(250)
+}
+async function s10(){
+ stage({n:10,name:"Telófase II + citocinese",text:"As duas células se dividem novamente, formando quatro células haploides geneticamente diferentes.",ploidy:"n",chrom:"2",chromatids:"2",dna:"1C",noteTitle:"Resultado final",note:"Uma replicação do DNA seguida por duas divisões celulares gera quatro células haploides.",progress:100});
+ await Promise.all([fade(E.spindleII,1,0,300),fade(E.left,1,0,500),fade(E.right,1,0,500),fade(E.bottom,1,0,250),...E.finals.map(f=>fade(f,0,1,500))]);
+ await Promise.all([
+  move(E.single[0],[255,155],[250,205],600),move(E.single[4],[305,155],[310,205],600),
+  move(E.single[1],[255,405],[250,355],600),move(E.single[5],[305,405],[310,355],600),
+  move(E.single[2],[745,155],[690,205],600),move(E.single[6],[695,155],[750,205],600),
+  move(E.single[3],[745,405],[690,355],600),move(E.single[7],[695,405],[750,355],600)
+ ]);
+ E.bottom.textContent="4 CÉLULAS HAPLOIDES";
+ await fade(E.bottom,0,1,300);$("stageTag").textContent="CONCLUÍDO"
+}
+async function run(){
+ if(started)return;started=true;$("playBtn").textContent="⏸ Pausar";
+ await s1();await s2();await s3();await s4();await s5();await s6();await s7();await s8();await s9();await s10();
+ $("playBtn").textContent="✓ Concluído";$("playBtn").disabled=true
+}
+$("playBtn").addEventListener("click",()=>{
+ if(!started){run();return}
+ paused=!paused;$("playBtn").textContent=paused?"▶ Continuar":"⏸ Pausar"
+});
+$("restartBtn").addEventListener("click",()=>location.reload());
+</script>
+</body>
+</html>
