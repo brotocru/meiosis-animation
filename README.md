@@ -1,32 +1,17 @@
-# Meiose — animação científica (versão 2)
+# Meiose — versão corrigida
 
-Representação didática e animada do processo de meiose usando HTML, CSS, JavaScript e SVG.
+Esta versão foi refeita para evitar bugs de transformação em SVG.
 
-## Modelo
-- célula animal simplificada;
-- 2n = 4;
-- dois pares de cromossomos homólogos;
-- citocineses simétricas para facilitar a visualização.
+## Diferenciais
+- sem `transform: scale()` em elementos SVG;
+- todos os movimentos são feitos em coordenadas do próprio SVG;
+- cromatina descondensada na interfase;
+- replicação do DNA na fase S;
+- sinapse, bivalentes e crossing-over;
+- separação dos homólogos na Anáfase I;
+- intercinese sem nova replicação;
+- separação das cromátides-irmãs na Anáfase II;
+- painel de ploidia, cromossomos, cromátides e conteúdo de DNA;
+- quatro células haploides ao final.
 
-## O que foi melhorado
-- interfase com cromatina descondensada;
-- fase S com replicação do DNA;
-- contagem de cromossomos, cromátides, ploidia e conteúdo de DNA;
-- cromossomos com centrômero;
-- sinapse de homólogos e formação de bivalentes;
-- crossing-over entre cromátides não-irmãs;
-- quiasma destacado;
-- orientação independente na Metáfase I;
-- separação correta dos homólogos na Anáfase I;
-- ausência de nova replicação durante a intercinese;
-- separação correta das cromátides-irmãs na Anáfase II;
-- quatro células haploides ao final;
-- timeline, painel de métricas e explicações científicas.
-
-## Conceitos-chave
-- A replicação do DNA não altera a ploidia.
-- Após a fase S: 2n = 4, 4 cromossomos, 8 cromátides, 4C de DNA.
-- Após a Meiose I: n = 2, 2 cromossomos por célula, 4 cromátides, 2C.
-- Após a Meiose II: n = 2, 2 cromossomos por célula, 2 cromátides, 1C.
-- Na Anáfase I separam-se cromossomos homólogos.
-- Na Anáfase II separam-se cromátides-irmãs.
+Modelo didático: célula animal, 2n = 4.
