@@ -1,0 +1,320 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #f5f8fc;
+  --card: #ffffff;
+  --text: #182033;
+  --muted: #68748b;
+  --border: #dbe3ef;
+  --accent: #5a5ee6;
+  --accent-soft: #ececff;
+  --maternal: #e45858;
+  --paternal: #3f73d8;
+  --cell-fill: #f8fbff;
+  --cell-stroke: #8ca1bd;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  width: min(1180px, calc(100% - 32px));
+  margin: 34px auto 50px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 28px;
+  align-items: flex-end;
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  color: var(--accent);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(38px, 6vw, 70px);
+  line-height: .98;
+}
+
+.subtitle {
+  max-width: 760px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.legend {
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  min-width: 170px;
+}
+
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.dot.maternal { background: var(--maternal); }
+.dot.paternal { background: var(--paternal); }
+
+.stage-card,
+.animation-card,
+.science-note {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+
+.stage-card {
+  padding: 20px 22px 16px;
+  margin-bottom: 16px;
+}
+
+.stage-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.stage-counter {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+
+h2 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 34px);
+}
+
+.stage-description {
+  color: var(--muted);
+  margin: 10px 0 14px;
+  line-height: 1.5;
+}
+
+.ploidy {
+  text-align: right;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ploidy strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--text);
+  font-size: 19px;
+}
+
+.progress {
+  height: 7px;
+  background: #edf1f7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--accent);
+  transition: width .45s ease;
+}
+
+.animation-card {
+  padding: 12px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(32, 48, 80, .07);
+}
+
+#meiosisSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 480px;
+}
+
+.cell {
+  fill: var(--cell-fill);
+  stroke: var(--cell-stroke);
+  stroke-width: 4;
+  filter: url(#softShadow);
+}
+
+.nucleus {
+  fill: rgba(90, 94, 230, .035);
+  stroke: #b3bfd1;
+  stroke-width: 3;
+  stroke-dasharray: 10 10;
+}
+
+.daughter,
+.final-cell {
+  opacity: 0;
+}
+
+.chromosome,
+.chromatid {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.chromosome line,
+.chromatid line {
+  fill: none;
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+
+.chromosome.red line,
+.chromatid.red line {
+  stroke: var(--maternal);
+}
+
+.chromosome.blue line,
+.chromatid.blue line {
+  stroke: var(--paternal);
+}
+
+.chromosome {
+  opacity: 1;
+}
+
+.chromatid {
+  opacity: 0;
+}
+
+.blue-tip {
+  stroke: var(--paternal) !important;
+}
+
+.red-tip {
+  stroke: var(--maternal) !important;
+}
+
+.equator {
+  stroke: #aab6c7;
+  stroke-width: 2;
+  stroke-dasharray: 8 10;
+  opacity: 0;
+}
+
+.spindle {
+  stroke: #a1aec0;
+  stroke-width: 2.5;
+  opacity: 0;
+}
+
+.pole {
+  fill: #7d8ba0;
+  stroke: none;
+}
+
+.crossing-highlight {
+  fill: rgba(90, 94, 230, .07);
+  stroke: var(--accent);
+  stroke-width: 3;
+  opacity: 0;
+}
+
+.svg-label,
+.final-label {
+  font-weight: 800;
+  fill: var(--accent);
+  opacity: 0;
+}
+
+.final-label {
+  fill: var(--text);
+  font-size: 19px;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px 0 14px;
+}
+
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary-button {
+  background: var(--accent);
+  color: white;
+}
+
+.secondary-button {
+  color: var(--text);
+  background: #e9eef6;
+}
+
+button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.science-note {
+  padding: 14px 18px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.science-note strong {
+  color: var(--text);
+}
+
+@media (max-width: 760px) {
+  .topbar,
+  .stage-heading {
+    display: block;
+  }
+
+  .legend {
+    margin-top: 18px;
+  }
+
+  .ploidy {
+    text-align: left;
+    margin-top: 14px;
+  }
+
+  #meiosisSvg {
+    min-height: 340px;
+  }
+}
