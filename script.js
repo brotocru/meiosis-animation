@@ -2,67 +2,83 @@ const $ = (id) => document.getElementById(id);
 
 const playBtn = $("playBtn");
 const restartBtn = $("restartBtn");
-const stageName = $("stageName");
-const stageDescription = $("stageDescription");
-const stageCounter = $("stageCounter");
-const progressFill = $("progressFill");
-const ploidyText = $("ploidyText");
-const scienceNote = $("scienceNote");
+const phaseTag = $("phaseTag");
+const phaseName = $("phaseName");
+const phaseDescription = $("phaseDescription");
+const ploidyMetric = $("ploidyMetric");
+const chromosomeMetric = $("chromosomeMetric");
+const chromatidMetric = $("chromatidMetric");
+const dnaMetric = $("dnaMetric");
+const observeTitle = $("observeTitle");
+const observeText = $("observeText");
+const progressBar = $("progressBar");
+
+const timelineItems = [...document.querySelectorAll("#timeline li")];
 
 const primaryCell = $("primaryCell");
 const nucleus = $("nucleus");
+const chromatinG1 = $("chromatinG1");
+const chromatinCopies = $("chromatinCopies");
+const replicationLabel = $("replicationLabel");
+
 const equatorI = $("equatorI");
+const equatorIILeft = $("equatorIILeft");
+const equatorIIRight = $("equatorIIRight");
 const spindleI = $("spindleI");
-const cellILeft = $("cellILeft");
-const cellIRight = $("cellIRight");
 const spindleII = $("spindleII");
-const crossingHighlight = $("crossingHighlight");
-const crossingText = $("crossingText");
+
+const cellLeft = $("cellLeft");
+const cellRight = $("cellRight");
+const finalCells = [$("final1"), $("final2"), $("final3"), $("final4")];
+
+const chrMLong = $("chrMLong");
+const chrPLong = $("chrPLong");
+const chrMShort = $("chrMShort");
+const chrPShort = $("chrPShort");
+const chromosomes = [chrMLong, chrPLong, chrMShort, chrPShort];
+
+const chiasmaGlow = $("chiasmaGlow");
+const chiasmaMark = $("chiasmaMark");
+const chiasmaLabel = $("chiasmaLabel");
+
+const meiosisILabel = $("meiosisILabel");
+const meiosisIILabel = $("meiosisIILabel");
 const finalLabel = $("finalLabel");
 
-const redLong = $("redLong");
-const blueLong = $("blueLong");
-const redShort = $("redShort");
-const blueShort = $("blueShort");
-const chromosomes = [redLong, blueLong, redShort, blueShort];
-
-const finalCells = [$("final1"), $("final2"), $("final3"), $("final4")];
-const chromatids = [
-  $("c1"), $("c2"), $("c3"), $("c4"),
-  $("c5"), $("c6"), $("c7"), $("c8")
+const singleGroup = $("singleChromosomes");
+const singles = [
+  $("sc1"), $("sc2"), $("sc3"), $("sc4"),
+  $("sc5"), $("sc6"), $("sc7"), $("sc8")
 ];
 
 let started = false;
 let paused = false;
-let activeAnimations = new Set();
+const activeAnimations = new Set();
 
-function place(el, x, y, rotation = 0, scale = 1) {
-  el.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg) scale(${scale})`;
+function setOpacity(el, value) {
+  el.style.opacity = value;
 }
 
-place(redLong, 430, 260, -6);
-place(blueLong, 570, 260, 6);
-place(redShort, 430, 370, 4);
-place(blueShort, 570, 370, -4);
-
-function updateStage(number, name, description, progress, ploidy, note) {
-  stageCounter.textContent = `Etapa ${number} de 10`;
-  stageName.textContent = name;
-  stageDescription.textContent = description;
-  progressFill.style.width = `${progress}%`;
-  ploidyText.textContent = ploidy;
-  scienceNote.textContent = note;
+function transformString(p) {
+  const x = p.x ?? 0;
+  const y = p.y ?? 0;
+  const r = p.r ?? 0;
+  const s = p.s ?? 1;
+  return `translate(${x}px, ${y}px) rotate(${r}deg) scale(${s})`;
 }
 
-function animate(el, keyframes, options = {}) {
+function place(el, x, y, r = 0, s = 1) {
+  el.style.transform = transformString({ x, y, r, s });
+}
+
+function animateElement(el, keyframes, options = {}) {
   const animation = el.animate(keyframes, {
-    duration: options.duration ?? 1200,
+    duration: options.duration ?? 900,
     easing: options.easing ?? "ease-in-out",
     fill: "forwards"
   });
 
   activeAnimations.add(animation);
-
   if (paused) animation.pause();
 
   return animation.finished
@@ -70,268 +86,389 @@ function animate(el, keyframes, options = {}) {
     .finally(() => activeAnimations.delete(animation));
 }
 
-function hold(duration = 800) {
-  return animate(document.body, [{ opacity: 1 }, { opacity: 1 }], { duration });
-}
-
-function move(el, from, to, duration = 1200) {
-  const start = `translate(${from.x}px, ${from.y}px) rotate(${from.r ?? 0}deg) scale(${from.s ?? 1})`;
-  const end = `translate(${to.x}px, ${to.y}px) rotate(${to.r ?? 0}deg) scale(${to.s ?? 1})`;
-  el.style.transform = end;
-
-  return animate(el, [
-    { transform: start },
-    { transform: end }
-  ], { duration });
-}
-
-function fade(el, from, to, duration = 700) {
+function fade(el, from, to, duration = 650) {
   el.style.opacity = to;
-  return animate(el, [{ opacity: from }, { opacity: to }], { duration });
+  return animateElement(el, [{ opacity: from }, { opacity: to }], { duration });
 }
 
-async function intro() {
-  updateStage(
-    1,
-    "Interfase pré-meiótica",
-    "Antes da meiose, o DNA já foi duplicado. Cada cromossomo está formado por duas cromátides-irmãs.",
-    8,
-    "2n = 4",
-    "A replicação do DNA acontece antes da Meiose I."
-  );
-  await fade(nucleus, 0.35, 1, 600);
-  await hold(900);
+function move(el, from, to, duration = 1100) {
+  const start = transformString(from);
+  const end = transformString(to);
+  el.style.transform = end;
+  return animateElement(el, [{ transform: start }, { transform: end }], { duration });
 }
 
-async function prophaseI() {
-  updateStage(
-    2,
-    "Prófase I",
-    "Os cromossomos homólogos se aproximam e formam pares. Nesta fase pode ocorrer crossing-over.",
-    20,
-    "2n = 4",
-    "O crossing-over troca segmentos entre cromátides não-irmãs de cromossomos homólogos."
+function scaleFade(el, fromScale, toScale, fromOpacity, toOpacity, duration = 800) {
+  el.style.opacity = toOpacity;
+  el.style.transform = `scale(${toScale})`;
+  return animateElement(
+    el,
+    [
+      { transform: `scale(${fromScale})`, opacity: fromOpacity },
+      { transform: `scale(${toScale})`, opacity: toOpacity }
+    ],
+    { duration }
   );
+}
+
+function hold(duration = 650) {
+  return animateElement(document.body, [{ opacity: 1 }, { opacity: 1 }], { duration });
+}
+
+function updateTimeline(stage) {
+  timelineItems.forEach((item) => {
+    const n = Number(item.dataset.stage);
+    item.classList.toggle("active", n === stage);
+    item.classList.toggle("done", n < stage);
+  });
+}
+
+function updateStage(data) {
+  phaseTag.textContent = `ETAPA ${data.stage} DE 10`;
+  phaseName.textContent = data.name;
+  phaseDescription.textContent = data.description;
+  ploidyMetric.textContent = data.ploidy;
+  chromosomeMetric.textContent = data.chromosomes;
+  chromatidMetric.textContent = data.chromatids;
+  dnaMetric.textContent = data.dna;
+  observeTitle.textContent = data.observeTitle;
+  observeText.textContent = data.observeText;
+  progressBar.style.width = `${data.progress}%`;
+  updateTimeline(data.stage);
+}
+
+function colorCrossingOver() {
+  $("mLongSwap").style.stroke = "var(--paternal)";
+  $("pLongSwap").style.stroke = "var(--maternal)";
+}
+
+function resetCrossingOverColor() {
+  $("mLongSwap").style.stroke = "";
+  $("pLongSwap").style.stroke = "";
+}
+
+function initialPositions() {
+  // posições usadas quando os cromossomos condensam na Prófase I
+  place(chrMLong, 445, 265, -8);
+  place(chrPLong, 635, 265, 8);
+  place(chrMShort, 445, 400, 5);
+  place(chrPShort, 635, 400, -5);
+
+  singles.forEach((el) => place(el, 0, 0));
+}
+
+initialPositions();
+
+async function stage1Interphase() {
+  updateStage({
+    stage: 1,
+    name: "Interfase pré-meiótica — fase S",
+    description: "A cromatina está descondensada. O DNA é replicado uma única vez antes do início da Meiose I.",
+    ploidy: "2n",
+    chromosomes: "4",
+    chromatids: "4 → 8",
+    dna: "2C → 4C",
+    observeTitle: "A ploidia não muda na fase S",
+    observeText: "Mesmo após a duplicação do DNA, a célula continua 2n = 4. O número de cromossomos não dobra; o que dobra é a quantidade de DNA e o número de cromátides.",
+    progress: 10
+  });
+
+  await fade(replicationLabel, 0, 1, 500);
+  await fade(chromatinCopies, 0, 1, 1200);
+  await hold(800);
+  await fade(replicationLabel, 1, 0, 450);
+}
+
+async function stage2ProphaseI() {
+  updateStage({
+    stage: 2,
+    name: "Prófase I — sinapse e crossing-over",
+    description: "Os cromossomos condensam, os homólogos se emparelham formando bivalentes (tétrades) e pode ocorrer crossing-over.",
+    ploidy: "2n",
+    chromosomes: "4",
+    chromatids: "8",
+    dna: "4C",
+    observeTitle: "Crossing-over gera novas combinações",
+    observeText: "A troca acontece entre cromátides não-irmãs de cromossomos homólogos. Os pontos de contato visíveis são chamados de quiasmas.",
+    progress: 22
+  });
 
   await Promise.all([
-    move(redLong, {x:430,y:260,r:-6}, {x:475,y:255,r:-10}, 1100),
-    move(blueLong, {x:570,y:260,r:6}, {x:525,y:255,r:10}, 1100),
-    move(redShort, {x:430,y:370,r:4}, {x:475,y:370,r:-8}, 1100),
-    move(blueShort, {x:570,y:370,r:-4}, {x:525,y:370,r:8}, 1100),
-    fade(nucleus, 1, 0, 900)
+    fade(chromatinG1, 1, 0, 700),
+    fade(chromatinCopies, 1, 0, 700),
+    fade(nucleus, 1, 0.15, 900),
+    ...chromosomes.map((c) => fade(c, 0, 1, 700)),
+    fade(meiosisILabel, 0, 1, 550)
+  ]);
+
+  // sinapse: homólogos se aproximam
+  await Promise.all([
+    move(chrMLong, {x:445,y:265,r:-8}, {x:505,y:255,r:-10}, 1000),
+    move(chrPLong, {x:635,y:265,r:8}, {x:575,y:255,r:10}, 1000),
+    move(chrMShort, {x:445,y:400,r:5}, {x:505,y:405,r:-7}, 1000),
+    move(chrPShort, {x:635,y:400,r:-5}, {x:575,y:405,r:7}, 1000)
   ]);
 
   await Promise.all([
-    fade(crossingHighlight, 0, 1, 500),
-    fade(crossingText, 0, 1, 500)
+    fade(chiasmaGlow, 0, 1, 400),
+    fade(chiasmaMark, 0, 1, 400),
+    fade(chiasmaLabel, 0, 1, 400)
   ]);
 
-  // Troca visual de segmentos no par de cromossomos longos.
-  $("redLongSwap").style.stroke = "var(--paternal)";
-  $("blueLongSwap").style.stroke = "var(--maternal)";
-
+  colorCrossingOver();
   await hold(1000);
 
   await Promise.all([
-    fade(crossingHighlight, 1, 0, 450),
-    fade(crossingText, 1, 0, 450)
+    fade(chiasmaGlow, 1, 0, 420),
+    fade(chiasmaMark, 1, 0, 420),
+    fade(chiasmaLabel, 1, 0, 420),
+    fade(nucleus, 0.15, 0, 420)
   ]);
 }
 
-async function metaphaseI() {
-  updateStage(
-    3,
-    "Metáfase I",
-    "Os pares de cromossomos homólogos alinham-se no plano equatorial da célula.",
-    32,
-    "2n = 4",
-    "Na Metáfase I, os cromossomos homólogos ainda estão emparelhados."
-  );
+async function stage3MetaphaseI() {
+  updateStage({
+    stage: 3,
+    name: "Metáfase I",
+    description: "Os bivalentes alinham-se no plano equatorial. A orientação de cada par é independente e, na célula real, é aleatória.",
+    ploidy: "2n",
+    chromosomes: "4",
+    chromatids: "8",
+    dna: "4C",
+    observeTitle: "Aqui estão alinhados pares de homólogos",
+    observeText: "Essa é uma diferença central em relação à Metáfase II. A orientação independente dos bivalentes também contribui para a variabilidade genética.",
+    progress: 34
+  });
 
   await Promise.all([
-    fade(equatorI, 0, 1, 500),
+    fade(equatorI, 0, 1, 450),
     fade(spindleI, 0, 1, 650),
-    move(redLong, {x:475,y:255,r:-10}, {x:470,y:240,r:0}, 900),
-    move(blueLong, {x:525,y:255,r:10}, {x:530,y:240,r:0}, 900),
-    move(redShort, {x:475,y:370,r:-8}, {x:470,y:380,r:0}, 900),
-    move(blueShort, {x:525,y:370,r:8}, {x:530,y:380,r:0}, 900)
-  ]);
-
-  await hold(600);
-}
-
-async function anaphaseI() {
-  updateStage(
-    4,
-    "Anáfase I",
-    "Os cromossomos homólogos se separam e migram para polos opostos. As cromátides-irmãs permanecem unidas.",
-    44,
-    "n = 2 por futuro núcleo",
-    "Meiose I: separam-se os cromossomos homólogos, não as cromátides-irmãs."
-  );
-
-  await Promise.all([
-    move(redLong, {x:470,y:240,r:0}, {x:265,y:245,r:-8}, 1500),
-    move(blueShort, {x:530,y:380,r:0}, {x:305,y:375,r:5}, 1500),
-    move(blueLong, {x:530,y:240,r:0}, {x:735,y:245,r:8}, 1500),
-    move(redShort, {x:470,y:380,r:0}, {x:695,y:375,r:-5}, 1500)
-  ]);
-
-  await hold(500);
-}
-
-async function telophaseI() {
-  updateStage(
-    5,
-    "Telófase I + Citocinese",
-    "A célula se divide em duas. Cada célula é haploide, mas seus cromossomos ainda possuem duas cromátides.",
-    55,
-    "n = 2",
-    "Após a Meiose I existem duas células haploides."
-  );
-
-  await Promise.all([
-    fade(primaryCell, 1, 0, 750),
-    fade(equatorI, 1, 0, 500),
-    fade(spindleI, 1, 0, 500),
-    fade(cellILeft, 0, 1, 900),
-    fade(cellIRight, 0, 1, 900)
-  ]);
-
-  await Promise.all([
-    move(redLong, {x:265,y:245,r:-8}, {x:250,y:270,r:0}, 700),
-    move(blueShort, {x:305,y:375,r:5}, {x:310,y:350,r:0}, 700),
-    move(blueLong, {x:735,y:245,r:8}, {x:690,y:270,r:0}, 700),
-    move(redShort, {x:695,y:375,r:-5}, {x:750,y:350,r:0}, 700)
+    move(chrMLong, {x:505,y:255,r:-10}, {x:505,y:250,r:0}, 850),
+    move(chrPLong, {x:575,y:255,r:10}, {x:575,y:250,r:0}, 850),
+    move(chrMShort, {x:505,y:405,r:-7}, {x:505,y:405,r:0}, 850),
+    move(chrPShort, {x:575,y:405,r:7}, {x:575,y:405,r:0}, 850)
   ]);
 
   await hold(650);
 }
 
-async function interkinesis() {
-  updateStage(
-    6,
-    "Entre Meiose I e Meiose II",
-    "As duas células se preparam para a segunda divisão. Não ocorre uma nova replicação do DNA.",
-    63,
-    "n = 2",
-    "Importante: não existe nova duplicação do DNA entre Meiose I e Meiose II."
-  );
-
-  await hold(1100);
-}
-
-async function prophaseII() {
-  updateStage(
-    7,
-    "Prófase II",
-    "Em cada célula, forma-se um novo fuso e os cromossomos voltam a se organizar para a segunda divisão.",
-    70,
-    "n = 2",
-    "A Meiose II começa com duas células haploides."
-  );
-
-  await fade(spindleII, 0, 1, 700);
+async function stage4AnaphaseI() {
+  updateStage({
+    stage: 4,
+    name: "Anáfase I",
+    description: "Os cromossomos homólogos migram para polos opostos. As cromátides-irmãs permanecem unidas pelo centrômero.",
+    ploidy: "n por polo",
+    chromosomes: "2 por polo",
+    chromatids: "4 por polo",
+    dna: "2C por polo",
+    observeTitle: "O X continua inteiro",
+    observeText: "Na Anáfase I não há separação das cromátides-irmãs. Cada cromossomo duplicado inteiro vai para um polo.",
+    progress: 46
+  });
 
   await Promise.all([
-    move(redLong, {x:250,y:270,r:0}, {x:250,y:310,r:0}, 800),
-    move(blueShort, {x:310,y:350,r:0}, {x:310,y:310,r:0}, 800),
-    move(blueLong, {x:690,y:270,r:0}, {x:690,y:310,r:0}, 800),
-    move(redShort, {x:750,y:350,r:0}, {x:750,y:310,r:0}, 800)
+    move(chrMLong, {x:505,y:250,r:0}, {x:275,y:255,r:-7}, 1450),
+    move(chrPShort, {x:575,y:405,r:0}, {x:330,y:400,r:6}, 1450),
+    move(chrPLong, {x:575,y:250,r:0}, {x:805,y:255,r:7}, 1450),
+    move(chrMShort, {x:505,y:405,r:0}, {x:750,y:400,r:-6}, 1450)
+  ]);
+
+  await hold(450);
+}
+
+async function stage5TelophaseI() {
+  updateStage({
+    stage: 5,
+    name: "Telófase I + citocinese",
+    description: "A célula divide-se em duas. Cada célula é haploide, mas os cromossomos ainda estão duplicados.",
+    ploidy: "n",
+    chromosomes: "2",
+    chromatids: "4",
+    dna: "2C",
+    observeTitle: "A Meiose I é reducional",
+    observeText: "O número de conjuntos cromossômicos cai de 2n para n. Porém, as cromátides-irmãs continuam juntas.",
+    progress: 57
+  });
+
+  await Promise.all([
+    fade(equatorI, 1, 0, 400),
+    fade(spindleI, 1, 0, 500),
+    scaleFade(primaryCell, 1, 0.9, 1, 0, 700),
+    scaleFade(cellLeft, .45, 1, 0, 1, 900),
+    scaleFade(cellRight, .45, 1, 0, 1, 900)
+  ]);
+
+  await Promise.all([
+    move(chrMLong, {x:275,y:255,r:-7}, {x:265,y:285,r:0}, 650),
+    move(chrPShort, {x:330,y:400,r:6}, {x:335,y:380,r:0}, 650),
+    move(chrPLong, {x:805,y:255,r:7}, {x:745,y:285,r:0}, 650),
+    move(chrMShort, {x:750,y:400,r:-6}, {x:815,y:380,r:0}, 650)
+  ]);
+
+  await hold(500);
+}
+
+async function stage6Interkinesis() {
+  updateStage({
+    stage: 6,
+    name: "Intercinese",
+    description: "As duas células entram em uma breve transição antes da Meiose II. Não ocorre uma nova fase S.",
+    ploidy: "n",
+    chromosomes: "2",
+    chromatids: "4",
+    dna: "2C",
+    observeTitle: "Não há nova replicação do DNA",
+    observeText: "O DNA foi replicado apenas uma vez, antes da Meiose I. A Meiose II começa com cromossomos ainda duplicados.",
+    progress: 64
+  });
+
+  await hold(1200);
+}
+
+async function stage7ProphaseII() {
+  updateStage({
+    stage: 7,
+    name: "Prófase II",
+    description: "Em cada célula, organiza-se um novo fuso para separar as cromátides-irmãs.",
+    ploidy: "n",
+    chromosomes: "2",
+    chromatids: "4",
+    dna: "2C",
+    observeTitle: "Começa a segunda divisão",
+    observeText: "A célula já é haploide. A Meiose II não reduz novamente a ploidia; ela separa as cromátides-irmãs.",
+    progress: 72
+  });
+
+  await Promise.all([
+    fade(meiosisILabel, 1, 0, 350),
+    fade(meiosisIILabel, 0, 1, 450),
+    fade(spindleII, 0, 1, 700)
+  ]);
+
+  await Promise.all([
+    move(chrMLong, {x:265,y:285,r:0}, {x:270,y:320,r:0}, 750),
+    move(chrPShort, {x:335,y:380,r:0}, {x:330,y:340,r:0}, 750),
+    move(chrPLong, {x:745,y:285,r:0}, {x:750,y:320,r:0}, 750),
+    move(chrMShort, {x:815,y:380,r:0}, {x:810,y:340,r:0}, 750)
   ]);
 }
 
-async function metaphaseII() {
-  updateStage(
-    8,
-    "Metáfase II",
-    "Os cromossomos se alinham individualmente no centro de cada uma das duas células.",
-    78,
-    "n = 2",
-    "Na Metáfase II, os cromossomos não estão pareados com seus homólogos."
-  );
+async function stage8MetaphaseII() {
+  updateStage({
+    stage: 8,
+    name: "Metáfase II",
+    description: "Os cromossomos alinham-se individualmente no equador de cada célula.",
+    ploidy: "n",
+    chromosomes: "2",
+    chromatids: "4",
+    dna: "2C",
+    observeTitle: "Agora o alinhamento é individual",
+    observeText: "Diferentemente da Metáfase I, os cromossomos homólogos não estão emparelhados.",
+    progress: 81
+  });
 
-  await hold(1100);
+  await Promise.all([
+    fade(equatorIILeft, 0, 1, 450),
+    fade(equatorIIRight, 0, 1, 450)
+  ]);
+
+  await hold(950);
 }
 
-async function anaphaseII() {
-  updateStage(
-    9,
-    "Anáfase II",
-    "Os centrômeros se dividem e as cromátides-irmãs finalmente se separam, migrando para polos opostos.",
-    89,
-    "n = 2",
-    "Meiose II: agora ocorre a separação das cromátides-irmãs."
-  );
+async function stage9AnaphaseII() {
+  updateStage({
+    stage: 9,
+    name: "Anáfase II",
+    description: "As cromátides-irmãs se separam no centrômero e migram para polos opostos.",
+    ploidy: "n por polo",
+    chromosomes: "2 por polo",
+    chromatids: "2 por polo",
+    dna: "1C por polo",
+    observeTitle: "Cada cromátide passa a ser um cromossomo",
+    observeText: "Depois da separação, cada cromátide-irmã é considerada um cromossomo independente.",
+    progress: 91
+  });
 
-  // Esconde os cromossomos em X e revela cromátides individuais na mesma região.
-  await Promise.all(chromosomes.map(c => fade(c, 1, 0, 350)));
+  await Promise.all([
+    fade(equatorIILeft, 1, 0, 300),
+    fade(equatorIIRight, 1, 0, 300),
+    ...chromosomes.map((c) => fade(c, 1, 0, 350))
+  ]);
+
+  setOpacity(singleGroup, 1);
 
   const starts = [
-    [250,310], [250,310], [690,310], [690,310],
-    [310,310], [310,310], [750,310], [750,310]
-  ];
-  const ends = [
-    [250,165], [250,455], [690,165], [690,455],
-    [310,165], [310,455], [750,165], [750,455]
+    [270,320], [270,320], [750,320], [750,320],
+    [330,340], [330,340], [810,340], [810,340]
   ];
 
-  chromatids.forEach((c, i) => {
-    place(c, starts[i][0], starts[i][1], 0, 1);
-    c.style.opacity = 1;
+  const ends = [
+    [270,165], [270,495], [750,165], [750,495],
+    [330,165], [330,495], [810,165], [810,495]
+  ];
+
+  singles.forEach((el, i) => {
+    place(el, starts[i][0], starts[i][1], 0, 1);
+    setOpacity(el, 1);
   });
 
   await Promise.all(
-    chromatids.map((c, i) =>
+    singles.map((el, i) =>
       move(
-        c,
-        {x: starts[i][0], y: starts[i][1], r:0},
-        {x: ends[i][0], y: ends[i][1], r:0},
-        1500
+        el,
+        {x:starts[i][0], y:starts[i][1], r:0},
+        {x:ends[i][0], y:ends[i][1], r:0},
+        1450
       )
     )
   );
 
-  await hold(400);
+  await hold(350);
 }
 
-async function telophaseII() {
-  updateStage(
-    10,
-    "Telófase II + Citocinese",
-    "As duas células se dividem novamente, formando quatro células haploides geneticamente diferentes.",
-    100,
-    "n = 2",
-    "Resultado final: quatro células haploides, com metade do número cromossômico da célula original."
-  );
+async function stage10TelophaseII() {
+  updateStage({
+    stage: 10,
+    name: "Telófase II + citocinese",
+    description: "As duas células se dividem novamente, formando quatro células haploides geneticamente diferentes.",
+    ploidy: "n",
+    chromosomes: "2",
+    chromatids: "2",
+    dna: "1C",
+    observeTitle: "Resultado da meiose",
+    observeText: "Uma única replicação do DNA foi seguida por duas divisões celulares. O crossing-over e a orientação independente aumentam a variabilidade genética.",
+    progress: 100
+  });
 
   await Promise.all([
-    fade(cellILeft, 1, 0, 700),
-    fade(cellIRight, 1, 0, 700),
-    fade(spindleII, 1, 0, 500),
-    ...finalCells.map(c => fade(c, 0, 1, 900))
+    fade(spindleII, 1, 0, 450),
+    fade(meiosisIILabel, 1, 0, 350),
+    scaleFade(cellLeft, 1, .9, 1, 0, 700),
+    scaleFade(cellRight, 1, .9, 1, 0, 700),
+    ...finalCells.map((cell) => scaleFade(cell, .45, 1, 0, 1, 900))
   ]);
 
-  await fade(finalLabel, 0, 1, 600);
-  stageCounter.textContent = "Processo concluído";
+  await fade(finalLabel, 0, 1, 500);
+  phaseTag.textContent = "PROCESSO CONCLUÍDO";
 }
 
-async function playMeiosis() {
+async function playSequence() {
   if (started) return;
 
   started = true;
+  paused = false;
   playBtn.textContent = "⏸ Pausar";
 
-  await intro();
-  await prophaseI();
-  await metaphaseI();
-  await anaphaseI();
-  await telophaseI();
-  await interkinesis();
-  await prophaseII();
-  await metaphaseII();
-  await anaphaseII();
-  await telophaseII();
+  await stage1Interphase();
+  await stage2ProphaseI();
+  await stage3MetaphaseI();
+  await stage4AnaphaseI();
+  await stage5TelophaseI();
+  await stage6Interkinesis();
+  await stage7ProphaseII();
+  await stage8MetaphaseII();
+  await stage9AnaphaseII();
+  await stage10TelophaseII();
 
   playBtn.textContent = "✓ Concluído";
   playBtn.disabled = true;
@@ -339,13 +476,13 @@ async function playMeiosis() {
 
 playBtn.addEventListener("click", () => {
   if (!started) {
-    playMeiosis();
+    playSequence();
     return;
   }
 
   paused = !paused;
 
-  activeAnimations.forEach(animation => {
+  activeAnimations.forEach((animation) => {
     if (paused) animation.pause();
     else animation.play();
   });

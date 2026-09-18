@@ -1,158 +1,319 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Meiose — Animação Interativa</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#eef3fb" />
+  <title>Meiose — animação científica</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="app">
-    <header class="topbar">
+  <main class="page-shell">
+    <header class="hero">
       <div>
-        <p class="eyebrow">BIOLOGIA • REPRESENTAÇÃO ANIMADA</p>
+        <p class="kicker">BIOLOGIA • MODELO ANIMADO</p>
         <h1>Meiose</h1>
-        <p class="subtitle">Acompanhe as transições entre as fases e observe como uma célula diploide origina quatro células haploides.</p>
+        <p class="hero-copy">
+          Uma representação contínua da replicação do DNA, Meiose I e Meiose II,
+          usando uma célula animal simplificada com <strong>2n = 4</strong>.
+        </p>
       </div>
 
-      <div class="legend" aria-label="Legenda dos cromossomos">
-        <span><i class="dot maternal"></i> Origem materna</span>
-        <span><i class="dot paternal"></i> Origem paterna</span>
+      <div class="model-badge">
+        <span>Modelo</span>
+        <strong>célula animal • 2n = 4</strong>
+        <small>citocineses simétricas para fins didáticos</small>
       </div>
     </header>
 
-    <section class="stage-card">
-      <div class="stage-heading">
-        <div>
-          <span id="stageCounter" class="stage-counter">Preparado</span>
-          <h2 id="stageName">Clique em “Iniciar meiose”</h2>
-        </div>
-        <div class="ploidy">
-          <span>Número cromossômico</span>
-          <strong id="ploidyText">2n = 4</strong>
-        </div>
+    <section class="dashboard" aria-label="Painel da fase atual">
+      <div class="phase-copy">
+        <span id="phaseTag" class="phase-tag">Preparado</span>
+        <h2 id="phaseName">Interfase pré-meiótica</h2>
+        <p id="phaseDescription">
+          Começamos antes da replicação do DNA, com a cromatina descondensada.
+        </p>
       </div>
 
-      <p id="stageDescription" class="stage-description">
-        A animação mostrará pareamento dos homólogos, crossing-over, separação dos cromossomos homólogos e, depois, separação das cromátides-irmãs.
-      </p>
-
-      <div class="progress" aria-label="Progresso da animação">
-        <div id="progressFill" class="progress-fill"></div>
+      <div class="metrics">
+        <div class="metric">
+          <span>Ploidia</span>
+          <strong id="ploidyMetric">2n</strong>
+        </div>
+        <div class="metric">
+          <span>Cromossomos / célula</span>
+          <strong id="chromosomeMetric">4</strong>
+        </div>
+        <div class="metric">
+          <span>Cromátides / célula</span>
+          <strong id="chromatidMetric">4</strong>
+        </div>
+        <div class="metric">
+          <span>Conteúdo de DNA</span>
+          <strong id="dnaMetric">2C</strong>
+        </div>
       </div>
     </section>
 
-    <section class="animation-card">
-      <svg id="meiosisSvg" viewBox="0 0 1000 620" role="img" aria-label="Animação esquemática do processo de meiose">
-        <defs>
-          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.12"/>
-          </filter>
-        </defs>
+    <section class="main-grid">
+      <aside class="timeline-card">
+        <div class="timeline-title">
+          <span>SEQUÊNCIA</span>
+          <strong>Fases da meiose</strong>
+        </div>
 
-        <!-- Célula inicial -->
-        <ellipse id="primaryCell" class="cell" cx="500" cy="310" rx="365" ry="235"/>
-        <ellipse id="nucleus" class="nucleus" cx="500" cy="310" rx="235" ry="155"/>
+        <ol id="timeline" class="timeline">
+          <li data-stage="1"><span>1</span><div><strong>Interfase</strong><small>replicação do DNA</small></div></li>
+          <li data-stage="2"><span>2</span><div><strong>Prófase I</strong><small>sinapse + crossing-over</small></div></li>
+          <li data-stage="3"><span>3</span><div><strong>Metáfase I</strong><small>bivalentes no equador</small></div></li>
+          <li data-stage="4"><span>4</span><div><strong>Anáfase I</strong><small>homólogos se separam</small></div></li>
+          <li data-stage="5"><span>5</span><div><strong>Telófase I</strong><small>2 células haploides</small></div></li>
+          <li data-stage="6"><span>6</span><div><strong>Intercinese</strong><small>sem nova replicação</small></div></li>
+          <li data-stage="7"><span>7</span><div><strong>Prófase II</strong><small>novo fuso</small></div></li>
+          <li data-stage="8"><span>8</span><div><strong>Metáfase II</strong><small>alinhamento individual</small></div></li>
+          <li data-stage="9"><span>9</span><div><strong>Anáfase II</strong><small>cromátides se separam</small></div></li>
+          <li data-stage="10"><span>10</span><div><strong>Telófase II</strong><small>4 células haploides</small></div></li>
+        </ol>
+      </aside>
 
-        <!-- Linha equatorial da Meiose I -->
-        <line id="equatorI" class="equator" x1="500" y1="120" x2="500" y2="500"/>
+      <section class="animation-panel">
+        <div class="visual-toolbar">
+          <div class="legend">
+            <span><i class="legend-line maternal"></i> origem materna</span>
+            <span><i class="legend-line paternal"></i> origem paterna</span>
+            <span><i class="legend-dot centromere-dot"></i> centrômero</span>
+            <span><i class="legend-line spindle-line"></i> fibras do fuso</span>
+          </div>
+          <span class="schematic">representação esquemática</span>
+        </div>
 
-        <!-- Fuso da Meiose I -->
-        <g id="spindleI" class="spindle">
-          <circle cx="150" cy="310" r="8" class="pole"/>
-          <circle cx="850" cy="310" r="8" class="pole"/>
-          <line x1="150" y1="310" x2="470" y2="240"/>
-          <line x1="150" y1="310" x2="470" y2="380"/>
-          <line x1="850" y1="310" x2="530" y2="240"/>
-          <line x1="850" y1="310" x2="530" y2="380"/>
-        </g>
+        <div class="svg-wrap">
+          <svg id="meiosisSvg" viewBox="0 0 1080 660" role="img"
+               aria-label="Representação animada das fases da meiose">
+            <defs>
+              <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="8" stdDeviation="10" flood-opacity=".12"/>
+              </filter>
+              <radialGradient id="cellGradient">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="100%" stop-color="#f4f8fe"/>
+              </radialGradient>
+            </defs>
 
-        <!-- Células após Meiose I -->
-        <ellipse id="cellILeft" class="cell daughter" cx="280" cy="310" rx="200" ry="225"/>
-        <ellipse id="cellIRight" class="cell daughter" cx="720" cy="310" rx="200" ry="225"/>
+            <!-- Célula original e núcleo -->
+            <ellipse id="primaryCell" class="cell" cx="540" cy="330" rx="390" ry="250"/>
+            <ellipse id="nucleus" class="nucleus" cx="540" cy="330" rx="245" ry="165"/>
 
-        <!-- Fuso da Meiose II -->
-        <g id="spindleII" class="spindle">
-          <circle cx="280" cy="115" r="7" class="pole"/>
-          <circle cx="280" cy="505" r="7" class="pole"/>
-          <circle cx="720" cy="115" r="7" class="pole"/>
-          <circle cx="720" cy="505" r="7" class="pole"/>
-          <line x1="280" y1="115" x2="250" y2="310"/>
-          <line x1="280" y1="115" x2="310" y2="310"/>
-          <line x1="280" y1="505" x2="250" y2="310"/>
-          <line x1="280" y1="505" x2="310" y2="310"/>
-          <line x1="720" y1="115" x2="690" y2="310"/>
-          <line x1="720" y1="115" x2="750" y2="310"/>
-          <line x1="720" y1="505" x2="690" y2="310"/>
-          <line x1="720" y1="505" x2="750" y2="310"/>
-        </g>
+            <!-- Cromatina descondensada (início da interfase) -->
+            <g id="chromatinG1" class="chromatin-group">
+              <path class="chromatin maternal-stroke" d="M420 275 C450 230, 480 310, 510 260 S560 300, 590 245"/>
+              <path class="chromatin paternal-stroke" d="M455 355 C490 315, 525 395, 560 350 S620 390, 650 335"/>
+              <path class="chromatin maternal-stroke short" d="M440 410 C470 385, 500 435, 530 405 S570 430, 600 395"/>
+              <path class="chromatin paternal-stroke short" d="M445 205 C475 180, 505 230, 535 200 S575 225, 605 190"/>
+            </g>
 
-        <!-- Quatro células finais -->
-        <ellipse id="final1" class="cell final-cell" cx="280" cy="155" rx="155" ry="112"/>
-        <ellipse id="final2" class="cell final-cell" cx="280" cy="465" rx="155" ry="112"/>
-        <ellipse id="final3" class="cell final-cell" cx="720" cy="155" rx="155" ry="112"/>
-        <ellipse id="final4" class="cell final-cell" cx="720" cy="465" rx="155" ry="112"/>
+            <!-- Cópias formadas na fase S -->
+            <g id="chromatinCopies" class="chromatin-group hidden">
+              <path class="chromatin maternal-stroke faint" d="M427 284 C457 239, 487 319, 517 269 S567 309, 597 254"/>
+              <path class="chromatin paternal-stroke faint" d="M462 364 C497 324, 532 404, 567 359 S627 399, 657 344"/>
+              <path class="chromatin maternal-stroke short faint" d="M447 419 C477 394, 507 444, 537 414 S577 439, 607 404"/>
+              <path class="chromatin paternal-stroke short faint" d="M452 214 C482 189, 512 239, 542 209 S582 234, 612 199"/>
+            </g>
 
-        <!-- Cromossomos duplicados -->
-        <g id="redLong" class="chromosome red" data-x="430" data-y="260">
-          <line x1="-18" y1="-34" x2="0" y2="0"/>
-          <line id="redLongSwap" x1="18" y1="-34" x2="0" y2="0"/>
-          <line x1="0" y1="0" x2="18" y2="34"/>
-          <line x1="0" y1="0" x2="-18" y2="34"/>
-        </g>
+            <text id="replicationLabel" class="svg-callout hidden" x="540" y="115" text-anchor="middle">
+              Fase S: o DNA é replicado uma única vez
+            </text>
 
-        <g id="blueLong" class="chromosome blue" data-x="570" data-y="260">
-          <line x1="-18" y1="-34" x2="0" y2="0"/>
-          <line id="blueLongSwap" x1="18" y1="-34" x2="0" y2="0"/>
-          <line x1="0" y1="0" x2="18" y2="34"/>
-          <line x1="0" y1="0" x2="-18" y2="34"/>
-        </g>
+            <!-- Linha equatorial / eixos -->
+            <line id="equatorI" class="equator hidden" x1="540" y1="105" x2="540" y2="555"/>
+            <line id="equatorIILeft" class="equator hidden" x1="145" y1="330" x2="470" y2="330"/>
+            <line id="equatorIIRight" class="equator hidden" x1="610" y1="330" x2="935" y2="330"/>
 
-        <g id="redShort" class="chromosome red short" data-x="430" data-y="370">
-          <line x1="-14" y1="-25" x2="0" y2="0"/>
-          <line x1="14" y1="-25" x2="0" y2="0"/>
-          <line x1="0" y1="0" x2="14" y2="25"/>
-          <line x1="0" y1="0" x2="-14" y2="25"/>
-        </g>
+            <!-- Fusos da Meiose I -->
+            <g id="spindleI" class="spindle hidden">
+              <g class="centrosome" transform="translate(165 330)">
+                <circle r="11"/><line x1="-24" x2="24"/><line y1="-24" y2="24"/>
+              </g>
+              <g class="centrosome" transform="translate(915 330)">
+                <circle r="11"/><line x1="-24" x2="24"/><line y1="-24" y2="24"/>
+              </g>
 
-        <g id="blueShort" class="chromosome blue short" data-x="570" data-y="370">
-          <line x1="-14" y1="-25" x2="0" y2="0"/>
-          <line x1="14" y1="-25" x2="0" y2="0"/>
-          <line x1="0" y1="0" x2="14" y2="25"/>
-          <line x1="0" y1="0" x2="-14" y2="25"/>
-        </g>
+              <line x1="165" y1="330" x2="500" y2="250"/>
+              <line x1="165" y1="330" x2="500" y2="405"/>
+              <line x1="915" y1="330" x2="580" y2="250"/>
+              <line x1="915" y1="330" x2="580" y2="405"/>
+            </g>
 
-        <!-- Destaque do crossing-over -->
-        <circle id="crossingHighlight" cx="500" cy="245" r="55" class="crossing-highlight"/>
-        <text id="crossingText" x="500" y="170" text-anchor="middle" class="svg-label">crossing-over</text>
+            <!-- Células após a primeira citocinese -->
+            <ellipse id="cellLeft" class="cell daughter-cell hidden" cx="300" cy="330" rx="215" ry="240"/>
+            <ellipse id="cellRight" class="cell daughter-cell hidden" cx="780" cy="330" rx="215" ry="240"/>
 
-        <!-- Cromátides após separação na Anáfase II -->
-        <g id="chromatids">
-          <g id="c1" class="chromatid red"><line x1="0" y1="-28" x2="0" y2="28"/><line class="tip blue-tip" x1="0" y1="-28" x2="0" y2="-10"/></g>
-          <g id="c2" class="chromatid red"><line x1="0" y1="-28" x2="0" y2="28"/></g>
-          <g id="c3" class="chromatid blue"><line x1="0" y1="-28" x2="0" y2="28"/><line class="tip red-tip" x1="0" y1="-28" x2="0" y2="-10"/></g>
-          <g id="c4" class="chromatid blue"><line x1="0" y1="-28" x2="0" y2="28"/></g>
-          <g id="c5" class="chromatid blue short"><line x1="0" y1="-22" x2="0" y2="22"/></g>
-          <g id="c6" class="chromatid blue short"><line x1="0" y1="-22" x2="0" y2="22"/></g>
-          <g id="c7" class="chromatid red short"><line x1="0" y1="-22" x2="0" y2="22"/></g>
-          <g id="c8" class="chromatid red short"><line x1="0" y1="-22" x2="0" y2="22"/></g>
-        </g>
+            <!-- Fusos da Meiose II -->
+            <g id="spindleII" class="spindle hidden">
+              <g class="centrosome" transform="translate(300 105)">
+                <circle r="9"/><line x1="-20" x2="20"/><line y1="-20" y2="20"/>
+              </g>
+              <g class="centrosome" transform="translate(300 555)">
+                <circle r="9"/><line x1="-20" x2="20"/><line y1="-20" y2="20"/>
+              </g>
+              <g class="centrosome" transform="translate(780 105)">
+                <circle r="9"/><line x1="-20" x2="20"/><line y1="-20" y2="20"/>
+              </g>
+              <g class="centrosome" transform="translate(780 555)">
+                <circle r="9"/><line x1="-20" x2="20"/><line y1="-20" y2="20"/>
+              </g>
 
-        <text id="finalLabel" x="500" y="604" text-anchor="middle" class="final-label">
-          4 células haploides geneticamente diferentes
-        </text>
-      </svg>
+              <line x1="300" y1="105" x2="275" y2="310"/>
+              <line x1="300" y1="105" x2="325" y2="310"/>
+              <line x1="300" y1="555" x2="275" y2="350"/>
+              <line x1="300" y1="555" x2="325" y2="350"/>
+
+              <line x1="780" y1="105" x2="755" y2="310"/>
+              <line x1="780" y1="105" x2="805" y2="310"/>
+              <line x1="780" y1="555" x2="755" y2="350"/>
+              <line x1="780" y1="555" x2="805" y2="350"/>
+            </g>
+
+            <!-- 4 células finais -->
+            <ellipse id="final1" class="cell final-cell hidden" cx="300" cy="165" rx="165" ry="120"/>
+            <ellipse id="final2" class="cell final-cell hidden" cx="300" cy="495" rx="165" ry="120"/>
+            <ellipse id="final3" class="cell final-cell hidden" cx="780" cy="165" rx="165" ry="120"/>
+            <ellipse id="final4" class="cell final-cell hidden" cx="780" cy="495" rx="165" ry="120"/>
+
+            <!-- Cromossomos duplicados.
+                 Cada X = 1 cromossomo duplicado / 2 cromátides-irmãs. -->
+            <g id="chrMLong" class="chromosome hidden maternal-chr">
+              <line class="arm normal" x1="-22" y1="-42" x2="0" y2="0"/>
+              <line id="mLongSwap" class="arm normal" x1="22" y1="-42" x2="0" y2="0"/>
+              <line class="arm normal" x1="0" y1="0" x2="22" y2="42"/>
+              <line class="arm normal" x1="0" y1="0" x2="-22" y2="42"/>
+              <circle class="centromere" r="7"/>
+            </g>
+
+            <g id="chrPLong" class="chromosome hidden paternal-chr">
+              <line class="arm normal" x1="-22" y1="-42" x2="0" y2="0"/>
+              <line id="pLongSwap" class="arm normal" x1="22" y1="-42" x2="0" y2="0"/>
+              <line class="arm normal" x1="0" y1="0" x2="22" y2="42"/>
+              <line class="arm normal" x1="0" y1="0" x2="-22" y2="42"/>
+              <circle class="centromere" r="7"/>
+            </g>
+
+            <g id="chrMShort" class="chromosome hidden maternal-chr short-chr">
+              <line class="arm normal" x1="-17" y1="-31" x2="0" y2="0"/>
+              <line class="arm normal" x1="17" y1="-31" x2="0" y2="0"/>
+              <line class="arm normal" x1="0" y1="0" x2="17" y2="31"/>
+              <line class="arm normal" x1="0" y1="0" x2="-17" y2="31"/>
+              <circle class="centromere" r="6"/>
+            </g>
+
+            <g id="chrPShort" class="chromosome hidden paternal-chr short-chr">
+              <line class="arm normal" x1="-17" y1="-31" x2="0" y2="0"/>
+              <line class="arm normal" x1="17" y1="-31" x2="0" y2="0"/>
+              <line class="arm normal" x1="0" y1="0" x2="17" y2="31"/>
+              <line class="arm normal" x1="0" y1="0" x2="-17" y2="31"/>
+              <circle class="centromere" r="6"/>
+            </g>
+
+            <!-- Crossing-over -->
+            <circle id="chiasmaGlow" class="chiasma hidden" cx="540" cy="245" r="66"/>
+            <path id="chiasmaMark" class="chiasma-mark hidden" d="M520 230 L560 270 M560 230 L520 270"/>
+            <text id="chiasmaLabel" class="svg-callout hidden" x="540" y="150" text-anchor="middle">
+              Quiasma: crossing-over entre cromátides não-irmãs
+            </text>
+
+            <!-- Cromátides / cromossomos após a separação na Anáfase II -->
+            <g id="singleChromosomes" class="hidden">
+              <g id="sc1" class="single-chromosome maternal-single">
+                <line class="body" x1="0" y1="-36" x2="0" y2="36"/>
+                <line class="recombined paternal-tip" x1="0" y1="-36" x2="0" y2="-17"/>
+                <circle class="centromere" r="6"/>
+              </g>
+              <g id="sc2" class="single-chromosome maternal-single">
+                <line class="body" x1="0" y1="-36" x2="0" y2="36"/>
+                <circle class="centromere" r="6"/>
+              </g>
+              <g id="sc3" class="single-chromosome paternal-single">
+                <line class="body" x1="0" y1="-36" x2="0" y2="36"/>
+                <line class="recombined maternal-tip" x1="0" y1="-36" x2="0" y2="-17"/>
+                <circle class="centromere" r="6"/>
+              </g>
+              <g id="sc4" class="single-chromosome paternal-single">
+                <line class="body" x1="0" y1="-36" x2="0" y2="36"/>
+                <circle class="centromere" r="6"/>
+              </g>
+
+              <g id="sc5" class="single-chromosome paternal-single short-single">
+                <line class="body" x1="0" y1="-27" x2="0" y2="27"/>
+                <circle class="centromere" r="5"/>
+              </g>
+              <g id="sc6" class="single-chromosome paternal-single short-single">
+                <line class="body" x1="0" y1="-27" x2="0" y2="27"/>
+                <circle class="centromere" r="5"/>
+              </g>
+              <g id="sc7" class="single-chromosome maternal-single short-single">
+                <line class="body" x1="0" y1="-27" x2="0" y2="27"/>
+                <circle class="centromere" r="5"/>
+              </g>
+              <g id="sc8" class="single-chromosome maternal-single short-single">
+                <line class="body" x1="0" y1="-27" x2="0" y2="27"/>
+                <circle class="centromere" r="5"/>
+              </g>
+            </g>
+
+            <text id="meiosisILabel" class="division-label hidden" x="540" y="625" text-anchor="middle">
+              MEIOSE I • divisão reducional
+            </text>
+            <text id="meiosisIILabel" class="division-label hidden" x="540" y="625" text-anchor="middle">
+              MEIOSE II • separação das cromátides-irmãs
+            </text>
+            <text id="finalLabel" class="final-label hidden" x="540" y="625" text-anchor="middle">
+              Resultado: 4 células haploides geneticamente diferentes
+            </text>
+          </svg>
+        </div>
+
+        <div class="controls">
+          <button id="playBtn" class="button primary">▶ Iniciar</button>
+          <button id="restartBtn" class="button secondary">↻ Reiniciar</button>
+        </div>
+
+        <div class="progress-track" aria-label="Progresso">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+      </section>
     </section>
 
-    <section class="controls">
-      <button id="playBtn" class="primary-button">▶ Iniciar meiose</button>
-      <button id="restartBtn" class="secondary-button">↻ Reiniciar</button>
+    <section class="explanation-grid">
+      <article class="explanation-card focus-card">
+        <span>O QUE OBSERVAR</span>
+        <h3 id="observeTitle">Replicação antes da meiose</h3>
+        <p id="observeText">
+          A ploidia continua 2n, mas a quantidade de DNA dobra de 2C para 4C.
+        </p>
+      </article>
+
+      <article class="explanation-card">
+        <span>PRECISÃO CIENTÍFICA</span>
+        <h3>O que significa “X”?</h3>
+        <p>
+          Cada X representa <strong>um cromossomo duplicado</strong>, formado por
+          duas cromátides-irmãs unidas pelo centrômero.
+        </p>
+      </article>
+
+      <article class="explanation-card">
+        <span>IMPORTANTE</span>
+        <h3>Modelo didático</h3>
+        <p>
+          A animação simplifica formas e distâncias. Ela representa uma meiose animal
+          com citocineses simétricas; na oogênese, por exemplo, a divisão do citoplasma é desigual.
+        </p>
+      </article>
     </section>
 
-    <section class="science-note">
-      <strong>Observe:</strong>
-      <span id="scienceNote">na Meiose I separam-se os cromossomos homólogos; na Meiose II separam-se as cromátides-irmãs.</span>
-    </section>
+    <footer>
+      <strong>Resumo:</strong> uma replicação do DNA → duas divisões celulares → quatro células haploides.
+    </footer>
   </main>
 
   <script src="script.js"></script>
