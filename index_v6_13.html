@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#eef3f9">
+<title>Meiose — animação científica V6</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#eef3f9;--card:#ffffff;--ink:#172033;--muted:#68758a;--line:#d9e2ee;
+  --accent:#5666e8;--accent2:#7b88ff;--soft:#eef0ff;--red:#df5960;--blue:#3e78d6;
+  --gold:#f0b64f;--spindle:#8592a5;--green:#16845b;
+}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--ink);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 8% 0%,rgba(86,102,232,.08),transparent 26%),
+    radial-gradient(circle at 92% 10%,rgba(62,120,214,.06),transparent 28%),
+    var(--bg);
+}
+.page{width:min(1320px,calc(100% - 28px));margin:24px auto 42px}
+.hero{display:flex;justify-content:space-between;gap:26px;align-items:flex-end;margin-bottom:16px}
+.kicker{margin:0 0 7px;color:var(--accent);font-size:11px;font-weight:900;letter-spacing:.15em}
+h1{margin:0;font-size:clamp(46px,7vw,80px);line-height:.93;letter-spacing:-.055em}
+.hero .desc{max-width:790px;margin:12px 0 0;color:var(--muted);line-height:1.55}
+.model-card,.status-card,.timeline,.animation-card,.note-card{
+  background:var(--card);border:1px solid var(--line);box-shadow:0 14px 40px rgba(32,49,78,.055)
+}
+.model-card{min-width:275px;padding:14px 16px;border-radius:18px}
+.model-card span,.model-card small{display:block;color:var(--muted);font-size:10px}
+.model-card strong{display:block;margin:4px 0;font-size:14px}
+
+.status-card{
+  display:flex;justify-content:space-between;align-items:center;gap:22px;
+  padding:17px 19px;border-radius:20px;margin-bottom:14px;
+  min-height:118px
+}
+.status-copy{flex:1;min-width:0;min-height:84px}
+.status-copy p{min-height:42px}
+.stage-tag{display:inline-block;padding:5px 9px;border-radius:999px;background:var(--soft);color:var(--accent);font-size:10px;font-weight:900}
+h2{margin:6px 0 3px;font-size:clamp(23px,3vw,34px);letter-spacing:-.025em}
+.status-copy p{margin:0;color:var(--muted);line-height:1.45;max-width:720px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.metric{min-width:108px;padding:9px 10px;border-radius:12px;background:#f7f9fd;border:1px solid #e6ebf3}
+.metric span{display:block;color:var(--muted);font-size:9px;line-height:1.2}
+.metric strong{display:block;margin-top:3px;font-size:18px}
+
+.layout{display:grid;grid-template-columns:235px minmax(0,1fr);gap:14px}
+.timeline{border-radius:20px;padding:14px}
+.timeline h3{margin:2px 5px 10px;font-size:16px}
+.timeline ol{list-style:none;padding:0;margin:0;display:grid;gap:2px}
+.timeline li{display:flex;align-items:center;gap:9px;padding:7px;border-radius:12px;color:var(--muted);transition:.2s}
+.timeline li b{display:grid;place-items:center;flex:0 0 27px;width:27px;height:27px;border-radius:50%;background:#edf1f6;font-size:10px}
+.timeline li strong,.timeline li small{display:block}
+.timeline li strong{font-size:11px}.timeline li small{font-size:9px;margin-top:1px;color:#8e99a9}
+.timeline li.active{background:var(--soft);color:var(--ink)}
+.timeline li.active b{background:var(--accent);color:#fff}
+.timeline li.done b{background:#dff3eb;color:var(--green)}
+
+.animation-card{border-radius:20px;overflow:hidden;contain:layout paint;transform:translateZ(0)}
+.legend-bar{
+  display:flex;justify-content:space-between;gap:12px;align-items:center;
+  padding:10px 14px;border-bottom:1px solid #e8edf4;color:var(--muted);font-size:10px
+}
+.legend{display:flex;flex-wrap:wrap;gap:13px}
+.legend span{display:flex;align-items:center;gap:6px}
+.swatch{display:inline-block;width:21px;height:5px;border-radius:999px}
+.swatch.red{background:var(--red)}.swatch.blue{background:var(--blue)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--gold)}
+.line{display:inline-block;width:21px;height:2px;background:var(--spindle)}
+.schematic{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#9ba6b6}
+.scene-wrap{background:#fbfcff;padding:2px 8px 0}
+#scene{display:block;width:100%;height:auto;max-height:620px;min-height:450px;shape-rendering:geometricPrecision;transform:translateZ(0)}
+.svg-label{fill:#5666e8;font-size:15px;font-weight:850}
+.svg-small{fill:#6f7d91;font-size:12px;font-weight:750}
+.svg-bottom{fill:#657188;font-size:13px;font-weight:900;letter-spacing:.045em}
+.svg-hint{fill:#8b97a9;font-size:11px;font-weight:700}
+
+.controls{
+  display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:10px 14px 13px;background:#fbfcff;border-top:1px solid #edf1f6
+}
+button{font:inherit}
+button{border:0;border-radius:11px;padding:10px 14px;font-weight:850;cursor:pointer}
+.primary{background:var(--accent);color:#fff;box-shadow:0 7px 18px rgba(86,102,232,.2);min-width:126px}
+.secondary{background:#e9eef5;color:var(--ink)}
+.ghost{background:#f5f7fb;color:#526078;border:1px solid #e2e8f1}
+button:disabled{opacity:.5;cursor:default}
+.progress{height:6px;background:#e8edf4}
+#bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+.notes{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px;margin-top:14px}
+.note-card{border-radius:17px;padding:15px 16px;min-height:126px}
+.note-card>span{font-size:9px;color:var(--accent);font-weight:900;letter-spacing:.12em}
+.note-card h3{margin:5px 0 5px;font-size:15px}
+.note-card p{margin:0;color:var(--muted);line-height:1.45;font-size:12px}
+.note-card.focus{border-color:#cfd6ff;background:linear-gradient(135deg,#f9faff,#fff)}
+.version{text-align:right;color:#9aa5b5;font-size:9px;margin-top:8px}
+
+@media(max-width:1020px){
+  .status-card{display:block}.metrics{margin-top:13px}.layout{grid-template-columns:1fr}.timeline{order:2}
+  .timeline ol{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:740px){
+  .status-card,.status-copy,.note-card{min-height:0}
+  .hero{display:block}.model-card{margin-top:13px}.metrics{grid-template-columns:repeat(2,1fr)}
+  .notes{grid-template-columns:1fr}.timeline ol{grid-template-columns:1fr}.legend-bar{display:block}
+  .schematic{display:block;margin-top:7px}#scene{min-height:360px}
+}
+</style>
+</head>
+<body>
+<main class="page">
+<header class="hero">
+  <div>
+    <p class="kicker">BIOLOGIA • MODELO ANIMADO</p>
+    <h1>Meiose</h1>
+    <p class="desc">Representação contínua e didática das transições da meiose em uma célula animal simplificada com <strong>2n = 4</strong>.</p>
+  </div>
+  <div class="model-card">
+    <span>MODELO</span>
+    <strong>1 célula diploide → 4 células haploides</strong>
+    <small>2 pares de cromossomos homólogos • citocinese simétrica</small>
+  </div>
+</header>
+
+<section class="status-card">
+  <div class="status-copy">
+    <span id="stageTag" class="stage-tag">PRONTO</span>
+    <h2 id="stageName">Interfase pré-meiótica</h2>
+    <p id="stageText">A cromatina está descondensada antes da replicação do DNA.</p>
+  </div>
+  <div class="metrics">
+    <div class="metric"><span>PLOIDIA</span><strong id="mPloidy">2n</strong></div>
+    <div class="metric"><span>CROMOSSOMOS / CÉLULA</span><strong id="mChrom">4</strong></div>
+    <div class="metric"><span>CROMÁTIDES / CÉLULA</span><strong id="mChromatids">4</strong></div>
+    <div class="metric"><span>CONTEÚDO DE DNA</span><strong id="mDNA">2C</strong></div>
+  </div>
+</section>
+
+<section class="layout">
+  <aside class="timeline">
+    <h3>Fases</h3>
+    <ol id="timeline">
+      <li data-n="1"><b>1</b><span><strong>Interfase</strong><small>G1 → S → G2</small></span></li>
+      <li data-n="2"><b>2</b><span><strong>Prófase I</strong><small>sinapse + crossing-over</small></span></li>
+      <li data-n="3"><b>3</b><span><strong>Metáfase I</strong><small>bivalentes no equador</small></span></li>
+      <li data-n="4"><b>4</b><span><strong>Anáfase I</strong><small>homólogos se separam</small></span></li>
+      <li data-n="5"><b>5</b><span><strong>Telófase I</strong><small>2 células haploides</small></span></li>
+      <li data-n="6"><b>6</b><span><strong>Intercinese</strong><small>sem nova replicação</small></span></li>
+      <li data-n="7"><b>7</b><span><strong>Prófase II</strong><small>novo fuso</small></span></li>
+      <li data-n="8"><b>8</b><span><strong>Metáfase II</strong><small>alinhamento individual</small></span></li>
+      <li data-n="9"><b>9</b><span><strong>Anáfase II</strong><small>cromátides se separam</small></span></li>
+      <li data-n="10"><b>10</b><span><strong>Telófase II</strong><small>4 células haploides</small></span></li>
+    </ol>
+  </aside>
+
+  <section class="animation-card">
+    <div class="legend-bar">
+      <div class="legend">
+        <span><i class="swatch red"></i> origem materna</span>
+        <span><i class="swatch blue"></i> origem paterna</span>
+        <span><i class="dot"></i> centrômero</span>
+        <span><i class="line"></i> fibras do fuso</span>
+      </div>
+      <span class="schematic">representação esquemática • não está em escala</span>
+    </div>
+
+    <div class="scene-wrap">
+    <svg id="scene" viewBox="0 0 1040 590" role="img" aria-label="Animação das fases da meiose">
+      <defs>
+        <radialGradient id="cellFill" cx="50%" cy="40%" r="70%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="55%" stop-color="#eef2ff"/>
+          <stop offset="100%" stop-color="#d9e4ff"/>
+        </radialGradient>
+        <radialGradient id="nucleusFill" cx="50%" cy="40%" r="70%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="100%" stop-color="#eef1ff"/>
+        </radialGradient>
+        <filter id="cellShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#7d8fbf" flood-opacity="0.18"/>
+        </filter>
+        <filter id="chromShadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#6f7fb2" flood-opacity="0.28"/>
+        </filter>
+      </defs>
+      <!-- CAMADA DE CÉLULAS -->
+      <ellipse id="mainCell" cx="520" cy="290" rx="365" ry="215" fill="url(#cellFill)" stroke="#8da4dd" stroke-width="4.5" filter="url(#cellShadow)"/>
+      <ellipse id="nucleus" cx="520" cy="290" rx="225" ry="140" fill="url(#nucleusFill)" stroke="#bfd0ea" stroke-width="3" stroke-dasharray="8 8"/>
+      <ellipse cx="520" cy="290" rx="347" ry="198" fill="none" stroke="#ffffff" stroke-width="2.2" opacity="0.55"/>
+      <ellipse cx="520" cy="290" rx="333" ry="186" fill="none" stroke="#c9d7ff" stroke-width="1.5" opacity="0.45"/>
+      <g opacity="0.28" stroke="#c5d4f8" stroke-width="2" fill="none">
+        <path d="M285 205 q24 -12 40 6"/>
+        <path d="M320 175 q20 -10 34 8"/>
+        <path d="M730 205 q24 -12 40 6"/>
+        <path d="M695 175 q20 -10 34 8"/>
+      </g>
+      <g opacity="0.28" fill="#b9c9ef">
+        <circle cx="315" cy="340" r="4"/><circle cx="355" cy="240" r="3.4"/><circle cx="690" cy="355" r="4"/>
+        <circle cx="725" cy="245" r="3.4"/><circle cx="782" cy="305" r="2.8"/><circle cx="260" cy="286" r="2.8"/>
+      </g>
+
+      <!-- células-filhas I (atrás dos cromossomos) -->
+      <g id="leftCellGroup" opacity="0">
+      <ellipse id="leftCell" cx="430" cy="290" rx="175" ry="175" fill="url(#cellFill)" stroke="#8da4dd" stroke-width="4.5"/>
+    </g>
+      <g id="rightCellGroup" opacity="0">
+      <ellipse id="rightCell" cx="610" cy="290" rx="175" ry="175" fill="url(#cellFill)" stroke="#8da4dd" stroke-width="4.5"/>
+    </g>
+
+      <!-- quatro células finais -->
+      <g id="finalCells" opacity="0">
+        <ellipse cx="290" cy="175" rx="128" ry="128" fill="url(#cellFill)" stroke="#8da4dd" stroke-width="4.5" filter="url(#cellShadow)"/>
+        <ellipse cx="290" cy="175" rx="118" ry="118" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.45"/>
+        <ellipse cx="290" cy="405" rx="128" ry="128" fill="url(#cellFill)" stroke="#8da4dd" stroke-width="4.5" filter="url(#cellShadow)"/>
+        <ellipse cx="290" cy="405" rx="118" ry="118" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.45"/>
+        <ellipse cx="750" cy="175" rx="128" ry="128" fill="url(#cellFill)" stroke="#8da4dd" stroke-width="4.5" filter="url(#cellShadow)"/>
+        <ellipse cx="750" cy="175" rx="118" ry="118" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.45"/>
+        <ellipse cx="750" cy="405" rx="128" ry="128" fill="url(#cellFill)" stroke="#8da4dd" stroke-width="4.5" filter="url(#cellShadow)"/>
+        <ellipse cx="750" cy="405" rx="118" ry="118" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.45"/>
+        <g opacity="0.22" stroke="#c3d0ef" stroke-width="1.8" fill="none">
+          <path d="M220 125 q16 -9 26 5"/><path d="M795 126 q16 -9 26 5"/><path d="M220 356 q16 -9 26 5"/><path d="M795 356 q16 -9 26 5"/>
+        </g>
+        <g opacity="0.22" fill="#bfd0ee">
+          <circle cx="240" cy="210" r="3"/><circle cx="815" cy="210" r="3"/><circle cx="240" cy="440" r="3"/><circle cx="815" cy="440" r="3"/>
+        </g>
+      </g>
+
+      <!-- núcleos finais -->
+      <g id="finalNuclei" opacity="0" fill="url(#nucleusFill)" stroke="#bfd0ea" stroke-width="2.5" stroke-dasharray="7 7">
+        <ellipse cx="290" cy="175" rx="82" ry="82"/>
+        <ellipse cx="290" cy="405" rx="82" ry="82"/>
+        <ellipse cx="750" cy="175" rx="82" ry="82"/>
+        <ellipse cx="750" cy="405" rx="82" ry="82"/>
+      </g>
+
+      <!-- CROMATINA NA INTERFASE -->
+      <g id="chromatin">
+        <path d="M405 220 C435 185,465 255,500 215 S560 252,595 198" fill="none" stroke="#df5960" stroke-width="8" stroke-linecap="round"/>
+        <path d="M420 315 C455 278,490 350,525 308 S585 349,625 295" fill="none" stroke="#3e78d6" stroke-width="8" stroke-linecap="round"/>
+        <path d="M420 375 C450 348,480 400,510 370 S555 396,585 360" fill="none" stroke="#df5960" stroke-width="7" stroke-linecap="round"/>
+        <path d="M435 165 C465 143,495 190,525 163 S570 187,600 153" fill="none" stroke="#3e78d6" stroke-width="7" stroke-linecap="round"/>
+      </g>
+      <g id="chromatinCopies" opacity="0">
+        <path d="M413 228 C443 193,473 263,508 223 S568 260,603 206" fill="none" stroke="#df5960" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+        <path d="M428 323 C463 286,498 358,533 316 S593 357,633 303" fill="none" stroke="#3e78d6" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+        <path d="M428 383 C458 356,488 408,518 378 S563 404,593 368" fill="none" stroke="#df5960" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+        <path d="M443 173 C473 151,503 198,533 171 S578 195,608 161" fill="none" stroke="#3e78d6" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+      </g>
+
+      <!-- ESTRUTURAS DO FUSO I -->
+      <line id="equatorI" x1="520" y1="110" x2="520" y2="465" stroke="#abb7c8" stroke-width="2" stroke-dasharray="7 9" opacity="0"/>
+      <g id="polesI" opacity="0">
+        <g transform="translate(170 290)">
+          <circle r="9" fill="#f7c76d" stroke="#d69338" stroke-width="1.8"/>
+          <circle cx="-7" cy="-4" r="3.1" fill="#ffd996" stroke="#d69338" stroke-width="1"/>
+          <circle cx="7" cy="4" r="3.1" fill="#ffd996" stroke="#d69338" stroke-width="1"/>
+          <circle cx="-5" cy="7" r="3.1" fill="#ffd996" stroke="#d69338" stroke-width="1"/>
+        </g>
+        <g transform="translate(870 290)">
+          <circle r="9" fill="#f7c76d" stroke="#d69338" stroke-width="1.8"/>
+          <circle cx="-7" cy="-4" r="3.1" fill="#ffd996" stroke="#d69338" stroke-width="1"/>
+          <circle cx="7" cy="4" r="3.1" fill="#ffd996" stroke="#d69338" stroke-width="1"/>
+          <circle cx="-5" cy="7" r="3.1" fill="#ffd996" stroke="#d69338" stroke-width="1"/>
+        </g>
+      </g>
+      <g id="fibersI" opacity="0" stroke="#e0cfa1" stroke-width="1.35">
+        <line id="fI1" x1="170" y1="290" x2="490" y2="215"/>
+        <line id="fI2" x1="170" y1="290" x2="490" y2="355"/>
+        <line id="fI3" x1="870" y1="290" x2="550" y2="215"/>
+        <line id="fI4" x1="870" y1="290" x2="550" y2="355"/>
+      </g>
+
+      <!-- ESTRUTURAS DO FUSO II -->
+      <g id="polesII" opacity="0">
+        <g transform="translate(300 105)"><circle r="8" fill="#f7c76d" stroke="#d69338" stroke-width="1.6"/><circle cx="-6" cy="-3" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/><circle cx="6" cy="4" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/><circle cx="-4" cy="6" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/></g>
+        <g transform="translate(300 475)"><circle r="8" fill="#f7c76d" stroke="#d69338" stroke-width="1.6"/><circle cx="-6" cy="-3" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/><circle cx="6" cy="4" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/><circle cx="-4" cy="6" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/></g>
+        <g transform="translate(740 105)"><circle r="8" fill="#f7c76d" stroke="#d69338" stroke-width="1.6"/><circle cx="-6" cy="-3" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/><circle cx="6" cy="4" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/><circle cx="-4" cy="6" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/></g>
+        <g transform="translate(740 475)"><circle r="8" fill="#f7c76d" stroke="#d69338" stroke-width="1.6"/><circle cx="-6" cy="-3" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/><circle cx="6" cy="4" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/><circle cx="-4" cy="6" r="2.7" fill="#ffd996" stroke="#d69338" stroke-width="0.9"/></g>
+      </g>
+      <line id="eq2L" x1="130" y1="290" x2="455" y2="290" stroke="#abb7c8" stroke-width="2" stroke-dasharray="7 9" opacity="0"/>
+      <line id="eq2R" x1="585" y1="290" x2="910" y2="290" stroke="#abb7c8" stroke-width="2" stroke-dasharray="7 9" opacity="0"/>
+      <g id="fibersII" opacity="0" stroke="#e0cfa1" stroke-width="1.25">
+        <line id="f2a" x1="300" y1="105" x2="270" y2="290"/><line id="f2b" x1="300" y1="475" x2="270" y2="290"/>
+        <line id="f2c" x1="300" y1="105" x2="330" y2="290"/><line id="f2d" x1="300" y1="475" x2="330" y2="290"/>
+        <line id="f2e" x1="740" y1="105" x2="710" y2="290"/><line id="f2f" x1="740" y1="475" x2="710" y2="290"/>
+        <line id="f2g" x1="740" y1="105" x2="770" y2="290"/><line id="f2h" x1="740" y1="475" x2="770" y2="290"/>
+      </g>
+      <g id="anaphaseFibersII" opacity="0" stroke="#e0cfa1" stroke-width="1.25">
+        <line id="af1" x1="300" y1="105" x2="270" y2="290"/><line id="af2" x1="300" y1="475" x2="270" y2="290"/>
+        <line id="af5" x1="300" y1="105" x2="330" y2="290"/><line id="af6" x1="300" y1="475" x2="330" y2="290"/>
+        <line id="af3" x1="740" y1="105" x2="710" y2="290"/><line id="af4" x1="740" y1="475" x2="710" y2="290"/>
+        <line id="af7" x1="740" y1="105" x2="770" y2="290"/><line id="af8" x1="740" y1="475" x2="770" y2="290"/>
+      </g>
+
+      <!-- CROMOSSOMOS CONDENSADOS -->
+      <g id="mLong" opacity="0" filter="url(#chromShadow)">
+        <line x1="-20" y1="-38" x2="0" y2="0" stroke="#df5960" stroke-width="10" stroke-linecap="round"/>
+        <line id="mSwap" x1="20" y1="-38" x2="0" y2="0" stroke="#df5960" stroke-width="10" stroke-linecap="round"/>
+        <circle id="mGene1" cx="6" cy="-11" r="3.1" fill="#df5960"/>
+        <circle id="mGene2" cx="11" cy="-21" r="3.1" fill="#df5960"/>
+        <circle id="mGene3" cx="16" cy="-31" r="3.1" fill="#df5960"/>
+        <line x1="0" y1="0" x2="20" y2="38" stroke="#df5960" stroke-width="10" stroke-linecap="round"/>
+        <line x1="0" y1="0" x2="-20" y2="38" stroke="#df5960" stroke-width="10" stroke-linecap="round"/>
+        <line x1="-18" y1="-34" x2="0" y2="0" stroke="#ffffff" stroke-width="4.4" stroke-linecap="round" opacity="0.28"/>
+        <line x1="0" y1="0" x2="18" y2="34" stroke="#ffffff" stroke-width="4.4" stroke-linecap="round" opacity="0.18"/>
+        <circle r="6.5" fill="#f0b64f" stroke="#fff7df" stroke-width="2"/>
+      </g>
+      <g id="pLong" opacity="0" filter="url(#chromShadow)">
+        <line x1="-20" y1="-38" x2="0" y2="0" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/>
+        <line id="pSwap" x1="20" y1="-38" x2="0" y2="0" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/>
+        <circle id="pGene1" cx="6" cy="-11" r="3.1" fill="#3e78d6"/>
+        <circle id="pGene2" cx="11" cy="-21" r="3.1" fill="#3e78d6"/>
+        <circle id="pGene3" cx="16" cy="-31" r="3.1" fill="#3e78d6"/>
+        <line x1="0" y1="0" x2="20" y2="38" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/>
+        <line x1="0" y1="0" x2="-20" y2="38" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/>
+        <line x1="-18" y1="-34" x2="0" y2="0" stroke="#ffffff" stroke-width="4.4" stroke-linecap="round" opacity="0.28"/>
+        <line x1="0" y1="0" x2="18" y2="34" stroke="#ffffff" stroke-width="4.4" stroke-linecap="round" opacity="0.18"/>
+        <circle r="6.5" fill="#f0b64f" stroke="#fff7df" stroke-width="2"/>
+      </g>
+      <g id="mShort" opacity="0" filter="url(#chromShadow)">
+        <line x1="-15" y1="-28" x2="0" y2="0" stroke="#df5960" stroke-width="9" stroke-linecap="round"/>
+        <line id="mShortSwap" x1="15" y1="-28" x2="0" y2="0" stroke="#df5960" stroke-width="9" stroke-linecap="round"/>
+        <circle id="mShortGene1" cx="4" cy="-8" r="2.6" fill="#df5960"/>
+        <circle id="mShortGene2" cx="8" cy="-16" r="2.6" fill="#df5960"/>
+        <circle id="mShortGene3" cx="12" cy="-23" r="2.6" fill="#df5960"/>
+        <line x1="0" y1="0" x2="15" y2="28" stroke="#df5960" stroke-width="9" stroke-linecap="round"/>
+        <line x1="0" y1="0" x2="-15" y2="28" stroke="#df5960" stroke-width="9" stroke-linecap="round"/>
+        <line x1="-13" y1="-24" x2="0" y2="0" stroke="#ffffff" stroke-width="3.9" stroke-linecap="round" opacity="0.28"/>
+        <line x1="0" y1="0" x2="13" y2="24" stroke="#ffffff" stroke-width="3.9" stroke-linecap="round" opacity="0.18"/>
+        <circle r="6" fill="#f0b64f" stroke="#fff7df" stroke-width="2"/>
+      </g>
+      <g id="pShort" opacity="0" filter="url(#chromShadow)">
+        <line x1="-15" y1="-28" x2="0" y2="0" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/>
+        <line id="pShortSwap" x1="15" y1="-28" x2="0" y2="0" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/>
+        <circle id="pShortGene1" cx="4" cy="-8" r="2.6" fill="#3e78d6"/>
+        <circle id="pShortGene2" cx="8" cy="-16" r="2.6" fill="#3e78d6"/>
+        <circle id="pShortGene3" cx="12" cy="-23" r="2.6" fill="#3e78d6"/>
+        <line x1="0" y1="0" x2="15" y2="28" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/>
+        <line x1="0" y1="0" x2="-15" y2="28" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/>
+        <line x1="-13" y1="-24" x2="0" y2="0" stroke="#ffffff" stroke-width="3.9" stroke-linecap="round" opacity="0.28"/>
+        <line x1="0" y1="0" x2="13" y2="24" stroke="#ffffff" stroke-width="3.9" stroke-linecap="round" opacity="0.18"/>
+        <circle r="6" fill="#f0b64f" stroke="#fff7df" stroke-width="2"/>
+      </g>
+
+      <!-- crossing-over -->
+      <path id="chiasma" d="M500 200 L540 230 M540 200 L500 230" fill="none" stroke="#5666e8" stroke-width="3.5" stroke-linecap="round" opacity="0"/>
+
+      <!-- cromátides separadas -->
+      <g id="singles" opacity="0">
+        <g id="s1">
+          <line x1="0" y1="-30" x2="0" y2="30" stroke="#df5960" stroke-width="10" stroke-linecap="round"/>
+          <line x1="0" y1="-30" x2="0" y2="-5" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/>
+          
+          <circle r="6" fill="#f0b64f"/>
+        </g>
+        <g id="s2"><line x1="0" y1="-30" x2="0" y2="30" stroke="#df5960" stroke-width="10" stroke-linecap="round"/><circle r="6" fill="#f0b64f"/></g>
+        <g id="s3">
+          <line x1="0" y1="-30" x2="0" y2="30" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/>
+          <line x1="0" y1="-30" x2="0" y2="-5" stroke="#df5960" stroke-width="10" stroke-linecap="round"/>
+          
+          <circle r="6" fill="#f0b64f"/>
+        </g>
+        <g id="s4"><line x1="0" y1="-30" x2="0" y2="30" stroke="#3e78d6" stroke-width="10" stroke-linecap="round"/><circle r="6" fill="#f0b64f"/></g>
+        <g id="s5"><line x1="0" y1="-22" x2="0" y2="22" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/><circle r="5" fill="#f0b64f"/></g>
+        <g id="s6">
+          <line x1="0" y1="-22" x2="0" y2="22" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/>
+          <line x1="0" y1="-22" x2="0" y2="-4" stroke="#df5960" stroke-width="9" stroke-linecap="round"/>
+          
+          <circle r="5" fill="#f0b64f"/>
+        </g>
+        <g id="s7"><line x1="0" y1="-22" x2="0" y2="22" stroke="#df5960" stroke-width="9" stroke-linecap="round"/><circle r="5" fill="#f0b64f"/></g>
+        <g id="s8">
+          <line x1="0" y1="-22" x2="0" y2="22" stroke="#df5960" stroke-width="9" stroke-linecap="round"/>
+          <line x1="0" y1="-22" x2="0" y2="-4" stroke="#3e78d6" stroke-width="9" stroke-linecap="round"/>
+          
+          <circle r="5" fill="#f0b64f"/>
+        </g>
+      </g>
+
+      <!-- cromatina descondensada final -->
+      <g id="finalChromatin" opacity="0" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <!-- célula 1: cromossomo longo recombinante + curto não recombinante -->
+        <path d="M236 162 C255 144,278 150,296 168 S330 188,352 170" stroke="#df5960" stroke-width="7"/>
+        <path d="M236 162 C248 151,260 151,270 158" stroke="#3e78d6" stroke-width="7"/>
+
+
+        <path d="M242 198 C258 184,278 186,296 202 S327 221,344 205" stroke="#3e78d6" stroke-width="6"/>
+
+        <!-- célula 2: longo não recombinante + curto recombinante -->
+        <path d="M236 392 C255 374,278 380,296 398 S330 418,352 400" stroke="#df5960" stroke-width="7"/>
+        <path d="M242 428 C258 414,278 416,296 432 S327 451,344 435" stroke="#3e78d6" stroke-width="6"/>
+        <path d="M242 428 C251 420,260 420,269 425" stroke="#df5960" stroke-width="6"/>
+
+
+
+        <!-- célula 3: cromossomo longo recombinante + curto não recombinante -->
+        <path d="M696 162 C715 144,738 150,756 168 S790 188,812 170" stroke="#3e78d6" stroke-width="7"/>
+        <path d="M696 162 C708 151,720 151,730 158" stroke="#df5960" stroke-width="7"/>
+
+
+        <path d="M702 198 C718 184,738 186,756 202 S787 221,804 205" stroke="#df5960" stroke-width="6"/>
+
+        <!-- célula 4: longo não recombinante + curto recombinante -->
+        <path d="M696 392 C715 374,738 380,756 398 S790 418,812 400" stroke="#3e78d6" stroke-width="7"/>
+        <path d="M702 428 C718 414,738 416,756 432 S787 451,804 435" stroke="#df5960" stroke-width="6"/>
+        <path d="M702 428 C711 420,720 420,729 425" stroke="#3e78d6" stroke-width="6"/>
+
+
+      </g>
+
+      <!-- textos dentro do SVG -->
+      <text id="phaseCallout" x="520" y="38" text-anchor="middle" class="svg-label" opacity="0"></text>
+      <text id="subCallout" x="520" y="60" text-anchor="middle" class="svg-small" opacity="0"></text>
+      <text id="bottomLabel" x="520" y="562" text-anchor="middle" class="svg-bottom" opacity="0"></text>
+      <text id="modelHint" x="520" y="538" text-anchor="middle" class="svg-hint">2n = 4 • cada X representa 1 cromossomo duplicado</text>
+    </svg>
+    </div>
+
+    <div class="controls">
+      <button id="playBtn" class="primary">▶ Iniciar</button>
+      <button id="restartBtn" class="secondary">↻ Reiniciar</button>
+      <button id="fullscreenBtn" class="ghost">⛶ Tela cheia</button>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+  </section>
+</section>
+
+<section class="notes">
+  <article class="note-card focus">
+    <span>O QUE OBSERVAR</span>
+    <h3 id="noteTitle">Uma replicação, duas divisões</h3>
+    <p id="noteText">O DNA é replicado apenas uma vez, antes da Meiose I.</p>
+  </article>
+  <article class="note-card">
+    <span>PRECISÃO CIENTÍFICA</span>
+    <h3>Prófase I simplificada</h3>
+    <p>Para manter a animação clara, as subfases leptóteno, zigóteno, paquíteno, diplóteno e diacinese não são mostradas separadamente.</p>
+  </article>
+  <article class="note-card">
+    <span>IMPORTANTE</span>
+    <h3>Modelo didático</h3>
+    <p>A animação representa uma meiose animal. A citocinese é mostrada de forma simétrica e as estruturas não estão em escala real.</p>
+  </article>
+</section>
+<div class="version">V6.13 • transições estabilizadas</div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const timeline=[...document.querySelectorAll("#timeline li")];
+const playBtn=$("playBtn"),restartBtn=$("restartBtn"),fullscreenBtn=$("fullscreenBtn");
+let paused=false,autoMode=false,animating=false,currentStage=0,speed=.82;
+
+const E={
+ mainCell:$("mainCell"),nucleus:$("nucleus"),chromatin:$("chromatin"),copies:$("chromatinCopies"),
+ callout:$("phaseCallout"),sub:$("subCallout"),equatorI:$("equatorI"),polesI:$("polesI"),fibersI:$("fibersI"),
+ mLong:$("mLong"),pLong:$("pLong"),mShort:$("mShort"),pShort:$("pShort"),cross:null,chiasma:$("chiasma"),
+ left:$("leftCell"),right:$("rightCell"),leftGroup:$("leftCellGroup"),rightGroup:$("rightCellGroup"),polesII:$("polesII"),eq2L:$("eq2L"),eq2R:$("eq2R"),fibersII:$("fibersII"),
+ aFibers:$("anaphaseFibersII"),singles:$("singles"),finalCells:$("finalCells"),finalNuclei:$("finalNuclei"),
+ finalChromatin:$("finalChromatin"),bottom:$("bottomLabel"),hint:$("modelHint"),
+ single:[$("s1"),$("s2"),$("s3"),$("s4"),$("s5"),$("s6"),$("s7"),$("s8")]
+};
+const C={mLong:[420,225],pLong:[620,225],mShort:[420,360],pShort:[620,360]};
+const S={};
+
+function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+function lerp(a,b,t){return a+(b-a)*t}
+function tween(ms,fn){
+ return new Promise(resolve=>{
+  let elapsed=0,last=performance.now();
+  function frame(now){
+   if(!paused){
+    elapsed+=(now-last)*speed;
+    const t=Math.min(elapsed/ms,1);
+    fn(ease(t));
+    if(t>=1){resolve();return}
+   }
+   last=now;requestAnimationFrame(frame)
+  }
+  requestAnimationFrame(frame)
+ })
+}
+function wait(ms){return tween(ms,()=>{})}
+function fade(el,a,b,ms=500){el.style.opacity=a;return tween(ms,t=>el.style.opacity=lerp(a,b,t))}
+function setPos(el,x,y,key){
+ el.setAttribute("transform",`translate(${x} ${y})`);
+ if(key){C[key]=[x,y];updateFibersI()}
+}
+function move(el,a,b,ms=900,key){
+ return tween(ms,t=>{
+  const x=lerp(a[0],b[0],t),y=lerp(a[1],b[1],t);
+  setPos(el,x,y,key)
+ })
+}
+function attr(el,name,a,b,ms=700){return tween(ms,t=>el.setAttribute(name,lerp(a,b,t)))}
+function setSingle(el,x,y,key){
+ el.setAttribute("transform",`translate(${x} ${y})`);
+ S[key]=[x,y];updateAnaphaseFibers()
+}
+function moveSingle(el,a,b,ms,key){
+ return tween(ms,t=>setSingle(el,lerp(a[0],b[0],t),lerp(a[1],b[1],t),key))
+}
+function setStage(s){
+ $("stageTag").textContent=`ETAPA ${s.n} DE 10`;
+ $("stageName").textContent=s.name;$("stageText").textContent=s.text;
+ $("mPloidy").textContent=s.ploidy;$("mChrom").textContent=s.chrom;
+ $("mChromatids").textContent=s.chromatids;$("mDNA").textContent=s.dna;
+ $("noteTitle").textContent=s.noteTitle;$("noteText").textContent=s.note;
+ $("bar").style.width=s.progress+"%";
+ timeline.forEach(li=>{
+  const n=+li.dataset.n;li.classList.toggle("active",n===s.n);li.classList.toggle("done",n<s.n)
+ })
+}
+function showCallout(main,sub=""){
+ E.callout.textContent=main;E.sub.textContent=sub;
+ return Promise.all([fade(E.callout,0,1,280),sub?fade(E.sub,0,1,280):Promise.resolve()])
+}
+function hideCallout(){
+ return Promise.all([fade(E.callout,+E.callout.style.opacity||1,0,220),fade(E.sub,+E.sub.style.opacity||0,0,220)])
+}
+function updateFibersI(){
+ const pairs=[["fI1",170,290,C.mLong],["fI2",170,290,C.pShort],["fI3",870,290,C.pLong],["fI4",870,290,C.mShort]];
+ pairs.forEach(([id,x1,y1,p])=>{const l=$(id);if(!l||!p)return;l.setAttribute("x1",x1);l.setAttribute("y1",y1);l.setAttribute("x2",p[0]);l.setAttribute("y2",p[1])})
+}
+function updateAnaphaseFibers(){
+ const defs=[
+  ["af1",300,105,S.s1],["af2",300,475,S.s2],["af5",300,105,S.s5],["af6",300,475,S.s6],
+  ["af3",740,105,S.s3],["af4",740,475,S.s4],["af7",740,105,S.s7],["af8",740,475,S.s8]
+ ];
+ defs.forEach(([id,x1,y1,p])=>{const l=$(id);if(!l||!p)return;l.setAttribute("x1",x1);l.setAttribute("y1",y1);l.setAttribute("x2",p[0]);l.setAttribute("y2",p[1])})
+}
+function updateButtons(){
+ if(currentStage>=10){
+  playBtn.textContent="✓ Concluído";
+  playBtn.disabled=true
+ } else {
+  playBtn.disabled=false
+ }
+}
+function stageDone(){
+ currentStage++;animating=false;
+ if(!autoMode && currentStage>0 && currentStage<10) playBtn.textContent="▶ Continuar";
+ updateButtons()
+}
+function forceOpacity(el,value){
+ if(el) el.style.opacity=value;
+}
+function cleanupLinesForStage(stageNumber){
+ // Hide line systems that belong strictly to earlier/later phases.
+ if(stageNumber>=5){
+  forceOpacity(E.equatorI,0);forceOpacity(E.fibersI,0);forceOpacity(E.polesI,0);
+ }
+ if(stageNumber<7 || stageNumber>=10){
+  if(stageNumber<7){forceOpacity(E.eq2L,0);forceOpacity(E.eq2R,0);forceOpacity(E.fibersII,0);forceOpacity(E.polesII,0);forceOpacity(E.aFibers,0);}
+ }
+ if(stageNumber>=9){
+  forceOpacity(E.eq2L,0);forceOpacity(E.eq2R,0);forceOpacity(E.fibersII,0);
+ }
+ if(stageNumber>=10){
+  forceOpacity(E.aFibers,0);forceOpacity(E.polesII,0);
+ }
+}
+
+setPos(E.mLong,420,225,"mLong");setPos(E.pLong,620,225,"pLong");setPos(E.mShort,420,360,"mShort");setPos(E.pShort,620,360,"pShort");
+
+async function p1(){
+ cleanupLinesForStage(1);
+ E.hint.textContent="2n = 4 • cromatina descondensada durante a interfase";
+ setStage({n:1,name:"Interfase pré-meiótica — G1, S e G2",text:"A cromatina permanece descondensada. Na fase S, o DNA é replicado uma única vez antes da meiose.",ploidy:"2n",chrom:"4",chromatids:"4 → 8",dna:"2C → 4C",noteTitle:"A ploidia não muda na fase S",note:"A célula continua 2n = 4. O número de cromossomos permanece 4; dobram o DNA e as cromátides.",progress:10});
+ await showCallout("G1 → S → G2","na fase S: 2C → 4C");
+ await fade(E.copies,0,1,1050);await wait(450);await hideCallout()
+}
+async function p2(){
+ cleanupLinesForStage(2);
+ E.hint.textContent="2n = 4 • cada X representa 1 cromossomo duplicado";
+ setStage({n:2,name:"Prófase I — sinapse e crossing-over",text:"Os cromossomos condensam, os homólogos se emparelham em bivalentes e pode ocorrer crossing-over.",ploidy:"2n",chrom:"4",chromatids:"8",dna:"4C",noteTitle:"Crossing-over entre cromátides não-irmãs",note:"O modelo mostra um único evento de crossing-over para clareza. O ponto de contato visível é o quiasma.",progress:22});
+ await Promise.all([fade(E.chromatin,1,0,600),fade(E.copies,1,0,600),fade(E.nucleus,1,.15,650),fade(E.mLong,0,1,520),fade(E.pLong,0,1,520),fade(E.mShort,0,1,520),fade(E.pShort,0,1,520)]);
+ await showCallout("Sinapse dos homólogos","formação de bivalentes (tétrades)");
+ await Promise.all([move(E.mLong,[420,225],[485,215],820,"mLong"),move(E.pLong,[620,225],[555,215],820,"pLong"),move(E.mShort,[420,360],[485,360],820,"mShort"),move(E.pShort,[620,360],[555,360],820,"pShort")]);
+ await hideCallout();
+ await Promise.all([fade(E.chiasma,0,1,280),showCallout("Crossing-over","segmentos e características passam do vermelho para o azul e vice-versa")]);
+ $("mSwap").setAttribute("stroke","#3e78d6");$("pSwap").setAttribute("stroke","#df5960");
+ $("mShortSwap").setAttribute("stroke","#3e78d6");$("pShortSwap").setAttribute("stroke","#df5960");
+ [["mGene1","#3e78d6"],["mGene2","#3e78d6"],["mGene3","#3e78d6"],
+  ["pGene1","#df5960"],["pGene2","#df5960"],["pGene3","#df5960"],
+  ["mShortGene1","#3e78d6"],["mShortGene2","#3e78d6"],["mShortGene3","#3e78d6"],
+  ["pShortGene1","#df5960"],["pShortGene2","#df5960"],["pShortGene3","#df5960"]]
+ .forEach(([id,color])=>$(id).setAttribute("fill",color));
+ await wait(700);
+ await Promise.all([fade(E.chiasma,1,0,280),hideCallout(),fade(E.nucleus,.15,0,320)])
+}
+async function p3(){
+ cleanupLinesForStage(3);
+ setStage({n:3,name:"Metáfase I",text:"Os bivalentes alinham-se no plano equatorial. A orientação de cada par é independente.",ploidy:"2n",chrom:"4",chromatids:"8",dna:"4C",noteTitle:"Orientação independente",note:"A orientação mostrada é apenas uma possibilidade; em células reais, cada par pode orientar-se independentemente.",progress:34});
+ E.bottom.textContent="MEIOSE I • divisão reducional";
+ await Promise.all([fade(E.equatorI,0,1,300),fade(E.polesI,0,1,380),fade(E.fibersI,0,1,420),fade(E.bottom,0,1,260),
+  move(E.mLong,[485,215],[490,215],520,"mLong"),move(E.pLong,[555,215],[550,215],520,"pLong"),
+  move(E.mShort,[485,360],[490,355],520,"mShort"),move(E.pShort,[555,360],[550,355],520,"pShort")]);
+ await wait(450)
+}
+async function p4(){
+ cleanupLinesForStage(4);
+ setStage({n:4,name:"Anáfase I",text:"Os cromossomos homólogos migram para polos opostos. As cromátides-irmãs permanecem unidas.",ploidy:"n por polo",chrom:"2 por polo",chromatids:"4 por polo",dna:"2C por polo",noteTitle:"Na Anáfase I, o X permanece inteiro",note:"Os centrômeros não se dividem nesta etapa. Cada cromossomo duplicado migra inteiro para um polo.",progress:46});
+ await fade(E.equatorI,1,0,250);
+ await Promise.all([move(E.mLong,[490,215],[285,225],1200,"mLong"),move(E.pShort,[550,355],[335,350],1200,"pShort"),move(E.pLong,[550,215],[755,225],1200,"pLong"),move(E.mShort,[490,355],[705,350],1200,"mShort")]);
+ await wait(300)
+}
+async function p5(){
+ cleanupLinesForStage(5);
+ setStage({n:5,name:"Telófase I + citocinese",text:"A célula se divide em duas células haploides. Os cromossomos continuam duplicados.",ploidy:"n",chrom:"2",chromatids:"4",dna:"2C",noteTitle:"A Meiose I reduz a ploidia",note:"O modelo não força a re-formação do envelope nuclear nesta etapa, pois isso pode variar entre organismos e tipos celulares.",progress:57});
+ await Promise.all([fade(E.fibersI,1,0,280),fade(E.polesI,1,0,280),fade(E.mainCell,1,0,500),fade(E.leftGroup,0,1,520),fade(E.rightGroup,0,1,520),fade(E.bottom,1,0,240)]);
+ await Promise.all([attr(E.left,"cx",430,300,900),attr(E.right,"cx",610,740,900),
+  move(E.mLong,[285,225],[265,250],700,"mLong"),move(E.pShort,[335,350],[325,330],700,"pShort"),
+  move(E.pLong,[755,225],[775,250],700,"pLong"),move(E.mShort,[705,350],[715,330],700,"mShort")]);
+ await wait(350)
+}
+async function p6(){
+ cleanupLinesForStage(6);
+ setStage({n:6,name:"Intercinese",text:"As duas células passam por uma curta transição antes da Meiose II. Não ocorre nova fase S.",ploidy:"n",chrom:"2",chromatids:"4",dna:"2C",noteTitle:"Sem nova replicação do DNA",note:"O DNA foi replicado uma única vez, antes da Meiose I. A Meiose II começa com cromossomos ainda duplicados.",progress:65});
+ await showCallout("Intercinese","sem nova replicação do DNA");await wait(650);await hideCallout()
+}
+async function p7(){
+ cleanupLinesForStage(7);
+ setStage({n:7,name:"Prófase II",text:"Em cada célula, organiza-se um novo fuso para separar as cromátides-irmãs.",ploidy:"n",chrom:"2",chromatids:"4",dna:"2C",noteTitle:"Começa a segunda divisão",note:"A Meiose II não reduz novamente a ploidia; ela separa as cromátides-irmãs.",progress:73});
+ E.bottom.textContent="MEIOSE II • separação das cromátides-irmãs";
+ await Promise.all([fade(E.polesII,0,1,380),fade(E.fibersII,0,1,420),fade(E.bottom,0,1,260),
+  move(E.mLong,[265,250],[270,290],520,"mLong"),move(E.pShort,[325,330],[330,290],520,"pShort"),move(E.pLong,[775,250],[710,290],520,"pLong"),move(E.mShort,[715,330],[770,290],520,"mShort")]);
+ await wait(300)
+}
+async function p8(){
+ cleanupLinesForStage(8);
+ setStage({n:8,name:"Metáfase II",text:"Os cromossomos alinham-se individualmente no equador de cada célula.",ploidy:"n",chrom:"2",chromatids:"4",dna:"2C",noteTitle:"Alinhamento individual",note:"Diferentemente da Metáfase I, os cromossomos homólogos não estão emparelhados.",progress:82});
+ await Promise.all([fade(E.eq2L,0,1,280),fade(E.eq2R,0,1,280)]);await wait(620)
+}
+async function p9(){
+ cleanupLinesForStage(9);
+ setStage({n:9,name:"Anáfase II",text:"Os centrômeros se dividem e as cromátides-irmãs migram para polos opostos.",ploidy:"n por polo",chrom:"2 por polo",chromatids:"2 por polo",dna:"1C por polo",noteTitle:"Cada cromátide torna-se um cromossomo",note:"Depois da separação no centrômero, cada cromátide passa a ser considerada um cromossomo independente.",progress:92});
+ await Promise.all([fade(E.eq2L,1,0,220),fade(E.eq2R,1,0,220),fade(E.fibersII,1,0,220),fade(E.mLong,1,0,250),fade(E.pLong,1,0,250),fade(E.mShort,1,0,250),fade(E.pShort,1,0,250),fade(E.aFibers,0,1,260)]);
+ E.singles.style.opacity=1;
+ const A=[[270,290],[270,290],[710,290],[710,290],[330,290],[330,290],[770,290],[770,290]];
+ const B=[[270,155],[270,425],[710,155],[710,425],[330,155],[330,425],[770,155],[770,425]];
+ E.single.forEach((el,i)=>setSingle(el,A[i][0],A[i][1],"s"+(i+1)));
+ await Promise.all(E.single.map((el,i)=>moveSingle(el,A[i],B[i],1150,"s"+(i+1))));
+ await wait(250)
+}
+async function p10(){
+ cleanupLinesForStage(10);
+ E.hint.textContent="n = 2 • cromossomos descondensam nos núcleos finais";
+ setStage({n:10,name:"Telófase II + citocinese",text:"Os núcleos se reorganizam, os cromossomos descondensam e formam-se quatro células haploides.",ploidy:"n",chrom:"2",chromatids:"2",dna:"1C",noteTitle:"Quatro células geneticamente diferentes",note:"As quatro células finais mostram combinações diferentes. Nas células de baixo, a troca de trechos vermelho ↔ azul também permanece visível nos cromossomos recombinantes.",progress:100});
+ await Promise.all([fade(E.aFibers,1,0,260),fade(E.polesII,1,0,260),fade(E.leftGroup,1,0,450),fade(E.rightGroup,1,0,450),fade(E.bottom,1,0,220),fade(E.finalCells,0,1,500)]);
+ await Promise.all([
+  moveSingle(E.single[0],[270,155],[260,175],520,"s1"),moveSingle(E.single[4],[330,155],[320,175],520,"s5"),
+  moveSingle(E.single[1],[270,425],[260,405],520,"s2"),moveSingle(E.single[5],[330,425],[320,405],520,"s6"),
+  moveSingle(E.single[2],[710,155],[720,175],520,"s3"),moveSingle(E.single[6],[770,155],[780,175],520,"s7"),
+  moveSingle(E.single[3],[710,425],[720,405],520,"s4"),moveSingle(E.single[7],[770,425],[780,405],520,"s8")
+ ]);
+ await Promise.all([fade(E.finalNuclei,0,1,380),fade(E.singles,1,0,520),fade(E.finalChromatin,0,1,520)]);
+ E.bottom.textContent="4 CÉLULAS HAPLOIDES • n = 2 • 1C";
+ await fade(E.bottom,0,1,280);$("stageTag").textContent="CONCLUÍDO"
+}
+
+const phases=[p1,p2,p3,p4,p5,p6,p7,p8,p9,p10];
+
+async function nextPhase(){
+ if(animating||currentStage>=phases.length)return;
+ animating=true;updateButtons();
+ await phases[currentStage]();
+ stageDone()
+}
+async function autoLoop(){
+ if(autoMode&&currentStage>=10)return;
+ while(autoMode&&currentStage<10){
+  if(!animating)await nextPhase();
+  if(autoMode&&currentStage<10)await wait(420)
+ }
+ if(currentStage>=10){autoMode=false;updateButtons()}
+}
+playBtn.addEventListener("click",()=>{
+ if(currentStage>=10)return;
+ if(autoMode){
+  paused=!paused;playBtn.textContent=paused?"▶ Continuar":"⏸ Pausar";return
+ }
+ paused=false;autoMode=true;playBtn.textContent="⏸ Pausar";autoLoop()
+});
+restartBtn.addEventListener("click",()=>location.reload());
+fullscreenBtn.addEventListener("click",async()=>{
+ try{
+  if(!document.fullscreenElement)await document.documentElement.requestFullscreen();
+  else await document.exitFullscreen()
+ }catch(e){}
+});
+document.addEventListener("fullscreenchange",()=>{fullscreenBtn.textContent=document.fullscreenElement?"⤢ Sair da tela cheia":"⛶ Tela cheia"});
+
+const params=new URLSearchParams(location.search);
+if(params.get("autoplay")==="1"){setTimeout(()=>playBtn.click(),250)}
+
+updateButtons();
+</script>
+</body>
+</html>
